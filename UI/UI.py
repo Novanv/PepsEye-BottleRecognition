@@ -22,18 +22,18 @@ font = pygame.font.Font(None, 36)
 border_radius_button = 30
 
 # Thiết lập camera
-camera = cv2.VideoCapture(1)
+camera = cv2.VideoCapture(0)
     
 # Bắt đầu luồng chụp ảnh
 capture_thread = None
 
 #Logo ))
-logo_fpt_path = os.path.join("image_set/logofptuniversity.png")
+logo_fpt_path = os.path.join("UI/image_set/logofptuniversity.png")
 logo_fpt_surface = pygame.image.load(logo_fpt_path)
 logo_fpt_surface = pygame.transform.scale(logo_fpt_surface, (150, 58))
 
 #Exit ))
-exit_path = os.path.join("image_set/exit.png")
+exit_path = os.path.join("UI/image_set/exit.png")
 exit_surface = pygame.image.load(exit_path)
 exit_surface = pygame.transform.scale(exit_surface, (40, 40))
 exit_clickable_area = pygame.Rect(20, screen_height - 70, 40, 40)
