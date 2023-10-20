@@ -45,3 +45,4 @@ def CHECK_LABEL(image_path):
 
     # Kết thúc hàm, trả về danh sách 'CHECK_LABEL'
     return CHECK_LABEL
+print(CHECK_LABEL("D:\A.I\PROJECT\Check_water\Group_3\image_product\good.jpg"))
