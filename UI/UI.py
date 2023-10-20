@@ -94,50 +94,51 @@ water_info_error_rect = button_detail_text.get_rect(center=((screen_width - 280)
 big_square_detail_rect = pygame.Rect((screen_width - 500 - 30), 30, 500, 500) 
 big_square_detail_color = (255, 255, 255) 
 
-def MODULE_CHECK(image_path):
-    CHECK = []
-    SIZE = (500,500)
-    image = cv2.imread(image_path)
-    image = cv2.resize(image,SIZE)
-    # Điều chỉnh độ mờ, làm mịn ảnh
-    image_GauBlur = cv2.GaussianBlur(image,(3,3),0) 
-    hsv_image = cv2.cvtColor(image_GauBlur, cv2.COLOR_BGR2HSV)
-    target_color_low = np.array([0, 0, 0])
-    target_color_high = np.array([180, 255, 30])
-    color_mask = cv2.inRange(hsv_image, target_color_low, target_color_high)
-    # Lật vùng trắng và đen
-    color_mask = cv2.bitwise_not(color_mask)
-    # Tạo một hình chữ nhật chỉ định khu vực mực nước chuẩn.
-    X_ROI_WATER, Y_ROI_WATER = 0,174
-    size_x_ROI_WATER = 500
-    size_y_ROI_WATER = 20
-    ROI_WATER = color_mask[Y_ROI_WATER : Y_ROI_WATER + size_y_ROI_WATER,X_ROI_WATER:X_ROI_WATER + size_x_ROI_WATER]
 
-    # Tạo một hình chữ Nhật kiểm tra lượng nước vượt mức giới hạn
-    X_ROI_WATER_OUT, Y_ROI_WATER_OUT = 0,153
-    size_x_ROI_WATER_OUT = 500
-    size_y_ROI_WATER_OUT = 20
-    ROI_WATER_OUT = color_mask[Y_ROI_WATER_OUT : Y_ROI_WATER_OUT + size_y_ROI_WATER_OUT,X_ROI_WATER_OUT:X_ROI_WATER_OUT + size_x_ROI_WATER_OUT]
-    # Đếm số lượng pixel khác không trong vùng quan tâm
-    # Kiểm tra mực nước vượt mức giới hạn
+
+#--------------------------------------------------------------        AI MODULE        ---------------------------------------------------------
+
+
+# Hàm check bottle = > return [0] = Good hoặc [1] = Error
+
+# Hàm check water level = > return [0] = Good hoặc [1] = Error
+
+# Hàm check Label = > return [0] = Good hoặc [1] = Error
+
+
+def MODULE_CHECK(image_path):
+    # Đây là hàm thực thi các AI module
+    # CHECK là một list nhận các giá trị [0,1,2,3] 
+    # + Thực hiện kiểm tra Các biến trên để đưa lại kết quả cho CHECK để dẫn đến kết luận cuối cùng.
+
+    CHECK = []
+    SIZE = (500,500) # Tất cả các ảnh đều resize về (500,500)
+
+    # Biến check bottle = List giá trị trả về từ hàm Check bottle (image_path)
+
+    # Biến check water level = List giá trị trả về từ hàm Check water level (image_path)
+
+    # Biến check Label = List giá trị trả về từ hàm Check Label (image_path)
+
     
-    if np.any(ROI_WATER_OUT != 255):
-        CHECK.append(3) 
-    # Kiểm tra xem có pixel 225 trong khu vực mực nước được chỉ định không, 
-    if np.any(ROI_WATER != 255):
-        CHECK.append(0)
-    else:
-        
-        CHECK.append(3)
-    if ("3" in CHECK) and (0 in CHECK):
-        CHECK.remove(0)
+
     return CHECK
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
 
 TYPE_ERROR = []
 is_csv = False
 
 # Hàm chụp ảnh và lưu vào thư mục hiện tại
 def capture_frame():
+    # Hàm thực hiện việc chụp ảnh
+    # Ảnh đã chụp sẽ được lưu thành captured_image.jpg
+    # List_error có thể nhận các giá trị [0,1,2,3] để thực hiện việc kiểm tra điều kiện để show thông tin kiểm tra chai nước ra ngoài màn hình
+    # is_csv để thực hiện việc [on] cho biến [nút on/off] cho việc kiêm tra, thực thi với file csv
+
     global is_csv
     list_error = []
     ret, frame = camera.read()
@@ -150,6 +151,9 @@ def capture_frame():
 
 # Hàm để chạy đồng hồ đếm và chụp ảnh sau mỗi 5 giây
 def capture_loop():
+
+    #Hàm thực hiện việc đợi 5s
+
     global capture_image
     global TYPE_ERROR
     while capture_image:
