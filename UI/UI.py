@@ -32,11 +32,23 @@ logo_fpt_path = os.path.join("image_set/logofptuniversity.png")
 logo_fpt_surface = pygame.image.load(logo_fpt_path)
 logo_fpt_surface = pygame.transform.scale(logo_fpt_surface, (150, 58))
 
-#Exit ))
+#Exit button ))
 exit_path = os.path.join("image_set/exit.png")
 exit_surface = pygame.image.load(exit_path)
 exit_surface = pygame.transform.scale(exit_surface, (40, 40))
 exit_clickable_area = pygame.Rect(20, screen_height - 70, 40, 40)
+
+#Exit setting button ))
+exit_setting_path = os.path.join("image_set/exit_setting.png")
+exit_setting_surface = pygame.image.load(exit_setting_path)
+exit_setting_surface = pygame.transform.scale(exit_setting_surface, (30, 30))
+exit_setting_clickable_area = pygame.Rect(710,10, 30, 30)
+
+#setting button ))
+setting_path = os.path.join("image_set/settings.png")
+setting_surface = pygame.image.load(setting_path)
+setting_surface = pygame.transform.scale(setting_surface, (40, 40))
+setting_clickable_area = pygame.Rect(20, screen_height - 120, 40, 40)
 
 # Button Start - End
 button_start_rect = pygame.Rect(screen_width - 410, screen_height - 120, 120, 50)  
@@ -94,6 +106,17 @@ water_info_error_rect = button_detail_text.get_rect(center=((screen_width - 280)
 big_square_detail_rect = pygame.Rect((screen_width - 500 - 30), 30, 500, 500) 
 big_square_detail_color = (255, 255, 255) 
 
+# hộp để setting thông tin khi bấm nút setting
+big_square_setting_rect = pygame.Rect(700, -10 , 700,screen_height + 20) 
+big_square_setting_color = (255, 255, 255) 
+
+#Input waiting time number
+input_box = pygame.Rect(1050, 102, 200, 50)
+color_inactive = pygame.Color('lightskyblue3')
+color_active = pygame.Color('dodgerblue2')
+color_input_box_wt = color_inactive
+text_waiting_time = ''
+
 
 
 #--------------------------------------------------------------        AI MODULE        ---------------------------------------------------------
@@ -128,6 +151,12 @@ def MODULE_CHECK(image_path):
 
 
 
+def is_valid_input(text):
+    # Hàm này kiểm tra xem chuỗi nhập vào chỉ chứa số hay không
+    if (len(text) < 3) and (text.isdigit() == True):
+        return True
+    else:
+        return False
 
 TYPE_ERROR = []
 is_csv = False
@@ -150,6 +179,8 @@ def capture_frame():
         return list_error
 
 # Hàm để chạy đồng hồ đếm và chụp ảnh sau mỗi 5 giây
+waiting_time_var = 5 #Biến kiểm soát thời gian đợi để chụp ảnh tiếp theo
+
 def capture_loop():
 
     #Hàm thực hiện việc đợi 5s
@@ -158,19 +189,26 @@ def capture_loop():
     global TYPE_ERROR
     while capture_image:
         TYPE_ERROR = capture_frame()
-        pygame.time.wait(5000)  # Chờ 5 giây
+        pygame.time.wait(waiting_time_var*1000)  # Chờ 5 giây
 
 
 # Bắt đầu luồng chụp ảnh
 capture_thread = None
 
 # Biến để kiểm soát
+
 capture_image = False
 is_square_detail_visible = False
+is_square_setting_visible = False
 is_detail_button_visible = True
 is_start_button_visible = True
+is_exit_setting_button_visible = False
 is_started = False
 running = True
+
+input_text_waiting_time_active = False
+
+# Phần thân chính chạy app-------------------------------------------------------------------------------------------------------------------|
 
 while running:
     for event in pygame.event.get():
@@ -198,9 +236,25 @@ while running:
                         capture_thread.start()    
                 is_started = not is_started
                 
+              
+            if setting_clickable_area.collidepoint(event.pos):
+                is_square_setting_visible = not is_square_setting_visible
+                is_exit_setting_button_visible = not is_exit_setting_button_visible
+            
+            if exit_setting_clickable_area.collidepoint(event.pos):
+                if is_square_setting_visible:    
+                    is_square_setting_visible = not is_square_setting_visible
+                    is_exit_setting_button_visible = not is_exit_setting_button_visible
+            
+            if is_square_setting_visible:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if input_box.collidepoint(event.pos):
+                        input_text_waiting_time_active = not input_text_waiting_time_active
+                    else:
+                        input_text_waiting_time_active = False
+                    color_input_box_wt = color_active if input_text_waiting_time_active else color_inactive
+
                 
-            if  exit_clickable_area.collidepoint(event.pos):
-                running = False
             if button_detail_rect.collidepoint(event.pos):
                 if is_square_detail_visible:
                     is_start_button_visible = True
@@ -211,6 +265,23 @@ while running:
                     button_detail_color = (0,0,0)
                     button_detail_text = font.render(" BACK", True, (255, 255, 255))
                 is_square_detail_visible = not is_square_detail_visible
+            
+            # diều kiện kết thúc app    
+            if  exit_clickable_area.collidepoint(event.pos):
+                running = False  
+        
+        if event.type == pygame.KEYDOWN:
+                if input_text_waiting_time_active:
+                    if event.key == pygame.K_RETURN:
+                        if is_valid_input(text_waiting_time):
+                            waiting_time_var = int(text_waiting_time)
+                        else:
+                            pass
+                        text_waiting_time = ''
+                    elif event.key == pygame.K_BACKSPACE:
+                        text_waiting_time = text_waiting_time[:-1]
+                    else:
+                        text_waiting_time += event.unicode         
     # Vẽ nền trắng
     screen.fill((192,192,192))    
       
@@ -322,6 +393,39 @@ while running:
         
         screen.blit(exit_surface,(20, screen_height - 70))
         
+        screen.blit(setting_surface,(20, screen_height - 120))
+        
+        if is_square_setting_visible:
+            pygame.draw.rect(screen, big_square_setting_color, big_square_setting_rect)
+            pygame.draw.rect(screen, (0,0,128), big_square_setting_rect, 3)
+            screen.blit(exit_setting_surface,(710,10))
+            
+            # Các thành phàn trong ô settings
+            title_setting_text = font.render("SETTINGS", True, (255, 0, 0))
+            title_setting_rect = title_setting_text.get_rect(center=(980, 80))
+            screen.blit(title_setting_text, title_setting_rect)
+            
+            waiting_time_text = font.render("Waiting time: ", True, (0, 0, 0))
+            waiting_time_rect = waiting_time_text.get_rect(center=(800,130))
+            screen.blit(waiting_time_text, waiting_time_rect)
+            
+            time_text = font.render(str(waiting_time_var), True, (255,0,255))
+            time_rect = waiting_time_text.get_rect(center=(1000,132))
+            screen.blit(time_text,  time_rect)
+            
+            font_set_time_text = pygame.font.Font(None, 26)
+            set_time_text = font_set_time_text.render("Change", True, (0,0,0))
+            set_time_rect = set_time_text.get_rect(center=(1000,134))
+            screen.blit(set_time_text, set_time_rect)
+            
+            txt_surface = font.render(text_waiting_time, True, (0,0,0))
+            width = max(100, txt_surface.get_width()+10)
+            input_box.w = width
+            text_y = input_box.centery - txt_surface.get_height() // 2
+            screen.blit(txt_surface, (input_box.x+10, text_y))
+            pygame.draw.rect(screen, color_input_box_wt, input_box, 2)
+            
+            
         if is_square_detail_visible:
             df = pd.read_csv("data.csv")
             type_counts = df['type'].value_counts()
