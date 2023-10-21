@@ -62,6 +62,13 @@ button_detail_color = (128,128,0)
 button_detail_text = font.render("DETAIL", True, (255, 255, 255))
 text_detail_rect = button_detail_text.get_rect(center=button_detail_rect.center)
 
+# Button submit time
+button_submit_time_rect = pygame.Rect(screen_width - 240, screen_height - 120, 120, 50)
+button_submit_time_color = (255,0,0)
+button_submit_time_text = font.render("submit", True, (255, 255, 255))
+text_submit_time_rect = button_submit_time_text.get_rect(center=button_detail_rect.center)
+
+
 # hộp để show thông tin
 big_square_rect = pygame.Rect((screen_width - 500 - 30), 30, 500, 500) 
 big_square_color = (255, 255, 255)   
@@ -89,7 +96,7 @@ label_error_rect = button_detail_text.get_rect(center=((screen_width - 470), 410
 water_error_text = font.render("Water level: ", True, (0, 0, 0))
 water_error_rect = button_detail_text.get_rect(center=((screen_width - 470), 450 + 20))
 
-# Thong tin good - error
+# Thông tin good - error
 bottle_info_color = (0,200,0)
 bottle_info_error_text = font.render("-", True, bottle_info_color)
 bottle_info_error_rect = button_detail_text.get_rect(center=((screen_width - 280), 370 + 20))
@@ -205,9 +212,9 @@ is_start_button_visible = True
 is_exit_setting_button_visible = False
 is_started = False
 running = True
-
+is_submit_waiting_time = False
 input_text_waiting_time_active = False
-
+is_error_wt = False
 # Phần thân chính chạy app-------------------------------------------------------------------------------------------------------------------|
 
 while running:
@@ -238,6 +245,7 @@ while running:
                 
               
             if setting_clickable_area.collidepoint(event.pos):
+                is_submit_waiting_time = not is_submit_waiting_time
                 is_square_setting_visible = not is_square_setting_visible
                 is_exit_setting_button_visible = not is_exit_setting_button_visible
             
@@ -254,34 +262,37 @@ while running:
                         input_text_waiting_time_active = False
                     color_input_box_wt = color_active if input_text_waiting_time_active else color_inactive
 
-                
-            if button_detail_rect.collidepoint(event.pos):
-                if is_square_detail_visible:
-                    is_start_button_visible = True
-                    button_detail_color = (128,128,0)
-                    button_detail_text = font.render("DETAIL", True, (255, 255, 255))
-                else:
-                    is_start_button_visible = False
-                    button_detail_color = (0,0,0)
-                    button_detail_text = font.render(" BACK", True, (255, 255, 255))
-                is_square_detail_visible = not is_square_detail_visible
+            if is_submit_waiting_time == False:  
+                if button_detail_rect.collidepoint(event.pos):
+                    if is_square_detail_visible:
+                        is_start_button_visible = True
+                        button_detail_color = (128,128,0)
+                        button_detail_text = font.render("DETAIL", True, (255, 255, 255))
+                    else:
+                        is_start_button_visible = False
+                        button_detail_color = (0,0,0)
+                        button_detail_text = font.render(" BACK", True, (255, 255, 255))
+                    is_square_detail_visible = not is_square_detail_visible
             
             # diều kiện kết thúc app    
             if  exit_clickable_area.collidepoint(event.pos):
                 running = False  
+                
+            if is_square_setting_visible:
+                if button_submit_time_rect.collidepoint(event.pos):
+                    if is_valid_input(text_waiting_time):
+                        waiting_time_var = int(text_waiting_time)
+                        is_error_wt = False
+                    else:
+                        is_error_wt = True
+                    text_waiting_time = ''
         
         if event.type == pygame.KEYDOWN:
-                if input_text_waiting_time_active:
-                    if event.key == pygame.K_RETURN:
-                        if is_valid_input(text_waiting_time):
-                            waiting_time_var = int(text_waiting_time)
-                        else:
-                            pass
-                        text_waiting_time = ''
-                    elif event.key == pygame.K_BACKSPACE:
-                        text_waiting_time = text_waiting_time[:-1]
-                    else:
-                        text_waiting_time += event.unicode         
+            if input_text_waiting_time_active:
+                if event.key == pygame.K_BACKSPACE:
+                    text_waiting_time = text_waiting_time[:-1]
+                else:
+                    text_waiting_time += event.unicode         
     # Vẽ nền trắng
     screen.fill((192,192,192))    
       
@@ -400,6 +411,9 @@ while running:
             pygame.draw.rect(screen, (0,0,128), big_square_setting_rect, 3)
             screen.blit(exit_setting_surface,(710,10))
             
+            pygame.draw.rect(screen, button_submit_time_color, button_submit_time_rect, border_radius = border_radius_button)
+            screen.blit(button_submit_time_text, text_submit_time_rect)
+            
             # Các thành phàn trong ô settings
             title_setting_text = font.render("SETTINGS", True, (255, 0, 0))
             title_setting_rect = title_setting_text.get_rect(center=(980, 80))
@@ -425,6 +439,11 @@ while running:
             screen.blit(txt_surface, (input_box.x+10, text_y))
             pygame.draw.rect(screen, color_input_box_wt, input_box, 2)
             
+            if is_error_wt:
+                font_error_wt_text = pygame.font.Font(None, 18)
+                error_wt_text = font_error_wt_text.render("Only numbers < 100", True, (255, 0, 0))
+                error_wt_rect = error_wt_text.get_rect(center=(1108, 162))
+                screen.blit(error_wt_text, error_wt_rect)
             
         if is_square_detail_visible:
             df = pd.read_csv("data.csv")
