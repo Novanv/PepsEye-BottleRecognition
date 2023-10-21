@@ -25,8 +25,6 @@ def CHECK_LABEL(image_path):
 
     # Chuyển sang ảnh có màu trắng và đen
     ret, image_thres = cv2.threshold(highlighted_image, 0, 255, cv2.THRESH_BINARY)
-
-    # Gán biến "has_label" để check có nhãn hay không
     has_label = np.any(image_thres == 255)
 
     # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -47,3 +45,4 @@ def CHECK_LABEL(image_path):
 
     # Kết thúc hàm, trả về danh sách 'CHECK_LABEL'
     return CHECK_LABEL
+print(CHECK_LABEL("D:\A.I\PROJECT\Check_water\Group_3\image_product\good.jpg"))
