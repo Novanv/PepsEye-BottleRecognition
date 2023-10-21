@@ -100,9 +100,8 @@ big_square_detail_color = (255, 255, 255)
 
 
 # Hàm check bottle = > return [0] = Good hoặc [1] = Error
+
 def BOTTLE_CHECK(image_path):
-    # Tạo một danh sách để check xem vỏ chai có lỗi không
-    CHECK = []
 
     # Đọc ảnh từ đường dẫn và gán cho biến 'img'
     img = cv2.imread(image_path)
@@ -152,12 +151,8 @@ def BOTTLE_CHECK(image_path):
     roi_content = img_roi[min_y:max_y, min_x:max_x] # Gán hình ảnh cắt ra theo 4 tọa độ cho biến 'roi_content'
 
     # Sau khi có được hình chữ nhật bao sát toàn bộ chai nước, ta có được chiều cao của chai nước tính bằng pixel, ở đây là 'roi_content.shape[0]'
-    #print("Height: ",roi_content.shape[0])
-    # Ta đặt ngưỡng cho chiều cao chai nước, nếu chiều cao nằm ngoài ngưỡng, ta thêm nhãn lỗi ("ERROR") vào danh sách 'CHECK'
-    if 410 < roi_content.shape[0] < 430:    # Cụ thể ở đây, ngưỡng dưới là 410 pixel và ngưỡng trên là 430 pixel cho chiều cao.
-        CHECK.append("GOOD")                # Thêm nhãn tốt ("GOOD") nếu chiều cao của chai nằm trong ngưỡng cho phép.
-    else:
-        CHECK.append("ERROR")               # Thêm nhãn lỗi ("ERROR") nếu chiều cao của chai nằm ngoài ngưỡng cho phép.
+    # Gán lại chiều cao chai nước chi biến 'height'
+    height = roi_content.shape[0]
 
 
     #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -200,13 +195,9 @@ def BOTTLE_CHECK(image_path):
         for point in contour_1: # Với mỗi điểm ảnh point trong đường viền contour, lấy tọa độ x và y của điểm ảnh đó
             x, y = point[0]
             max_x = max(max_x, x) # So sánh tọa độ x và y của mỗi điểm ảnh với 'max_x' và cập nhật nếu x lớn hơn, ở đây chỉ lấy ra chiều rộng lớn nhất 
-    #print(max_x)
-    # Đặt ngưỡng cho chiều rộng
-    if 150 < max_x < 170:       # Cụ thể ở đây, ngưỡng dưới là 150 pixel và ngưỡng trên là 170 pixel
-        CHECK.append("GOOD")    # Nếu chiều rộng nằm trong ngưỡng thì thêm nhãn tốt ("GOOD") vào trong danh sách 'CHECK'
-    else: 
-        CHECK.append("ERROR")   # Nếu chiều rộng nằm ngoài ngưỡng thì thêm nhãn lỗi ("ERROR") vào trong danh sách 'CHECK'
-
+    # Gán lại chiều rộng thân trên cho biến 'width_1'
+    width_1 = max_x
+    
 
     #-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
     # Check chiều rộng phần thân giữa:
@@ -235,13 +226,8 @@ def BOTTLE_CHECK(image_path):
         for point in contour_2: # Với mỗi điểm ảnh point trong đường viền contour, lấy tọa độ x và y của điểm ảnh đó
             x, y = point[0]
             max_x = max(max_x, x) # So sánh tọa độ x và y của mỗi điểm ảnh với 'max_x' và cập nhật nếu x lớn hơn, ở đây chỉ lấy ra chiều rộng lớn nhất 
-    #print(max_x)
-
-    # Đặt ngưỡng cho chiều rộng         
-    if 145 < max_x < 160:   # Cụ thể ở đây, ngưỡng dưới là 145 pixel và ngưỡng trên là 160 pixel
-        CHECK.append("GOOD")    # Nếu chiều rộng nằm trong ngưỡng thì thêm nhãn tốt ("GOOD") vào trong danh sách 'CHECK'
-    else: 
-        CHECK.append("ERROR")   # Nếu chiều rộng nằm ngoài ngưỡng thì thêm nhãn lỗi ("ERROR") vào trong danh sách 'CHECK'
+    # Gán lại chiều rộng thân giữa cho biến 'width_2'
+    width_2 = max_x
 
 
     #-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
@@ -271,30 +257,50 @@ def BOTTLE_CHECK(image_path):
         for point in contour_3: # Với mỗi điểm ảnh point trong đường viền contour, lấy tọa độ x và y của điểm ảnh đó
             x, y = point[0]
             max_x = max(max_x, x)   # So sánh tọa độ x và y của mỗi điểm ảnh với 'max_x' và cập nhật nếu x lớn hơn, ở đây chỉ lấy ra chiều rộng lớn nhất             
-    #print(max_x) 
+    # Gán lại chiều rộng thân dưới cho biến width_3 
+    width_3 = max_x
 
-    # Đặt ngưỡng cho chiều rộng  
-    if 150 < max_x < 170:   # Cụ thể ở đây, ngưỡng dưới là 150 pixel và ngưỡng trên là 170 pixel
-        CHECK.append("GOOD")    # Nếu chiều rộng nằm trong ngưỡng thì thêm nhãn tốt ("GOOD") vào trong danh sách 'CHECK'
-    else: 
-        CHECK.append("ERROR")   # Nếu chiều rộng nằm ngoài ngưỡng thì thêm nhãn lỗi ("ERROR") vào trong danh sách 'CHECK'
-
+    
 
     #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    # Cuối cùng, check xem thử trong danh sách 'CHECK' có nhãn lỗi ("ERROR") hay không
-
+    # Cuối cùng, check xem thử tỉ lệ chai nước có lỗi hay không.
     # Tạo một danh sách để tổng kết xem vỏ chai có lỗi hay không
     BOTTLE_CHECK = []
 
-    # Nếu có nhãn lỗi ("ERROR") trong danh sách 'CHECK'
-    if "ERROR" in CHECK:
-        BOTTLE_CHECK.append(1)  # Thêm nhãn '1' vào danh sách 'BOTTLE_CHECK'
-    # Nếu không có nhãn lỗi ("ERROR") trong danh sách 'CHECK'
-    else:                           
-        BOTTLE_CHECK.append(0)  # Thêm nhãn '0' vào danh sách 'BOTTLE_CHECK'
-    
-    # Kết thúc hàm, trả về danh sách 'BOTTLE_CHECK'
+    # Tạo một danh sách để check xem từng tỉ lệ cho chiều rộng và chiều cao của vỏ chai.
+    CHECK = []
+
+    # Xét tỉ lệ chiều rộng thân trên với thân giữa
+    if (width_1 / width_2) > 1: # Thân trên luôn luôn lớn hơn thân giữa
+        CHECK.append(0)
+    else:
+        CHECK.append(1)
+
+    # Xét tỉ lệ chiều rộng thân trên với thân dưới
+    if 0.98 <(width_1 / width_3) < 1.02:    # Thân trên và thân dưới có tỉ lệ chiều rộng xấp xỉ bằng 1
+        CHECK.append(0)
+    else:
+        CHECK.append(1)
+
+    # Xét tỉ lệ chiều cao với chiều rộng 
+    if 2.63 < (height / width_1) < 2.67:    # Tỉ lệ xấp xỉ của chiều cao và chiều rộng thân trên 
+        CHECK.append(0)
+    else:
+        CHECK.append(1)
+
+    if 2.79 < (height / width_2) < 2.83:    # Tỉ lệ xấp xỉ của chiều cao và chiều rộng thân giữa 
+        CHECK.append(0)
+    else:
+        CHECK.append(1)
+
+    # Xét xem có lỗi tỉ lệ chai nước không. 
+    BOTTLE_CHECK = []
+    if 1 in CHECK :             # Nếu có thì trả về cho danh sách kết quả 'BOTTLE_CHECK' là 1 
+        BOTTLE_CHECK.append(1)
+    else:                       # Nếu không thì trả về cho danh sách kết quả 'BOTTLE_CHECK' là 0
+        BOTTLE_CHECK.append(0)  
     return BOTTLE_CHECK
+
 
 # Hàm check water level = > return [0] = Good hoặc [1] = Error
 
