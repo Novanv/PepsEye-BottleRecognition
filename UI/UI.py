@@ -28,33 +28,39 @@ camera = cv2.VideoCapture(1)
 capture_thread = None
 
 #Logo ))
-logo_fpt_path = os.path.join("image_set/logofptuniversity.png")
+logo_fpt_path = os.path.join("UI/image_set/logofptuniversity.png")
 logo_fpt_surface = pygame.image.load(logo_fpt_path)
 logo_fpt_surface = pygame.transform.scale(logo_fpt_surface, (150, 58))
 
 #Exit button ))
-exit_path = os.path.join("image_set/exit.png")
+exit_path = os.path.join("UI/image_set/exit.png")
 exit_surface = pygame.image.load(exit_path)
 exit_surface = pygame.transform.scale(exit_surface, (40, 40))
 exit_clickable_area = pygame.Rect(20, screen_height - 70, 40, 40)
 
 #Exit setting button ))
-exit_setting_path = os.path.join("image_set/exit_setting.png")
+exit_setting_path = os.path.join("UI/image_set/exit_setting.png")
 exit_setting_surface = pygame.image.load(exit_setting_path)
 exit_setting_surface = pygame.transform.scale(exit_setting_surface, (30, 30))
 exit_setting_clickable_area = pygame.Rect(710,10, 30, 30)
 
 #setting button ))
-setting_path = os.path.join("image_set/settings.png")
+setting_path = os.path.join("UI/image_set/settings.png")
 setting_surface = pygame.image.load(setting_path)
 setting_surface = pygame.transform.scale(setting_surface, (40, 40))
 setting_clickable_area = pygame.Rect(20, screen_height - 120, 40, 40)
+
+#Time - icon ))
+time_icon_path = os.path.join("UI/image_set/time.png")
+time_icon_surface = pygame.image.load(time_icon_path)
+time_icon_surface = pygame.transform.scale(time_icon_surface, (25, 25))
 
 # Button Start - End
 button_start_rect = pygame.Rect(screen_width - 410, screen_height - 120, 120, 50)  
 button_start_color = (0,128,0)
 button_start_text = font.render("START", True, (255, 255, 255))
 text_start_rect = button_start_text.get_rect(center=button_start_rect.center)
+
 
 # Button Detail
 button_detail_rect = pygame.Rect(screen_width - 240, screen_height - 120, 120, 50)
@@ -154,8 +160,7 @@ def MODULE_CHECK(image_path):
 
     return CHECK
 
-#-----------------------------------------------------------------------------------------------------------------------------------------------
-
+# #-----------------------------------------------------------------------------------------------------------------------------------------------
 
 
 def is_valid_input(text):
@@ -167,7 +172,8 @@ def is_valid_input(text):
 
 TYPE_ERROR = []
 is_csv = False
-
+is_countdown = False
+Timer_wait = 0
 # Hàm chụp ảnh và lưu vào thư mục hiện tại
 def capture_frame():
     # Hàm thực hiện việc chụp ảnh
@@ -191,11 +197,14 @@ waiting_time_var = 5 #Biến kiểm soát thời gian đợi để chụp ảnh 
 def capture_loop():
 
     #Hàm thực hiện việc đợi 5s
-
+    global is_countdown
     global capture_image
     global TYPE_ERROR
+    global Timer_wait
     while capture_image:
         TYPE_ERROR = capture_frame()
+        Timer_wait = pygame.time.get_ticks()
+        is_countdown = True
         pygame.time.wait(waiting_time_var*1000)  # Chờ 5 giây
 
 
@@ -214,6 +223,7 @@ is_started = False
 running = True
 input_text_waiting_time_active = False
 is_error_wt = False
+
 # Phần thân chính chạy app-------------------------------------------------------------------------------------------------------------------|
 
 while running:
@@ -229,6 +239,7 @@ while running:
                     button_start_text = font.render("START", True, (255, 255, 255))
                     
                     capture_image = False
+                    is_countdown = False
                     capture_thread.cancel()
                 else:
                     status_light_color = (0,255,0)
@@ -276,7 +287,7 @@ while running:
             if  exit_clickable_area.collidepoint(event.pos):
                 running = False  
                 
-            if is_square_setting_visible:
+            if is_square_setting_visible == True and (not is_started == True):
                 if button_submit_time_rect.collidepoint(event.pos):
                     if is_valid_input(text_waiting_time):
                         waiting_time_var = int(text_waiting_time)
@@ -404,13 +415,22 @@ while running:
         
         screen.blit(setting_surface,(20, screen_height - 120))
         
+        screen.blit(time_icon_surface,(380, 538))
+        
         if is_square_setting_visible:
             pygame.draw.rect(screen, big_square_setting_color, big_square_setting_rect)
             pygame.draw.rect(screen, (0,0,128), big_square_setting_rect, 3)
             screen.blit(exit_setting_surface,(710,10))
             
-            pygame.draw.rect(screen, button_submit_time_color, button_submit_time_rect, border_radius = border_radius_button)
-            screen.blit(button_submit_time_text, text_submit_time_rect)
+            if is_started:
+                font_noti_submit_text = pygame.font.Font(None, 20)
+                noti_submit_text = font_noti_submit_text.render("Stop the program before setting", True, (255, 0, 0))
+                noti_submit_rect = noti_submit_text.get_rect(center=(screen_width-120, screen_height-20))
+                screen.blit(noti_submit_text, noti_submit_rect)
+            
+            if not is_started:
+                pygame.draw.rect(screen, button_submit_time_color, button_submit_time_rect, border_radius = border_radius_button)
+                screen.blit(button_submit_time_text, text_submit_time_rect)
             
             # Các thành phàn trong ô settings
             title_setting_text = font.render("SETTINGS", True, (255, 0, 0))
@@ -473,6 +493,13 @@ while running:
             error_info_error_rect = button_detail_text.get_rect(center=((screen_width - 440), 270))
             screen.blit(error_info_error_text, error_info_error_rect)
             
+        if is_countdown:
+            elapsed_time = (pygame.time.get_ticks() - Timer_wait) // 1000
+            if 0 <= elapsed_time <= waiting_time_var:
+                countdown_text = font.render(str(waiting_time_var - elapsed_time) if (waiting_time_var - elapsed_time) != 0 else "-", True, (0,0,255))
+                screen.blit(countdown_text, (425, 540))
+            else:
+                countdown_text = waiting_time_var
         pygame.display.flip()
 
 camera.release()
