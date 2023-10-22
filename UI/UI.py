@@ -212,7 +212,6 @@ is_start_button_visible = True
 is_exit_setting_button_visible = False
 is_started = False
 running = True
-is_submit_waiting_time = False
 input_text_waiting_time_active = False
 is_error_wt = False
 # Phần thân chính chạy app-------------------------------------------------------------------------------------------------------------------|
@@ -245,13 +244,12 @@ while running:
                 
               
             if setting_clickable_area.collidepoint(event.pos):
-                is_submit_waiting_time = not is_submit_waiting_time
-                is_square_setting_visible = not is_square_setting_visible
+                is_square_setting_visible = True
                 is_exit_setting_button_visible = not is_exit_setting_button_visible
             
             if exit_setting_clickable_area.collidepoint(event.pos):
                 if is_square_setting_visible:    
-                    is_square_setting_visible = not is_square_setting_visible
+                    is_square_setting_visible = False
                     is_exit_setting_button_visible = not is_exit_setting_button_visible
             
             if is_square_setting_visible:
@@ -262,7 +260,7 @@ while running:
                         input_text_waiting_time_active = False
                     color_input_box_wt = color_active if input_text_waiting_time_active else color_inactive
 
-            if is_submit_waiting_time == False:  
+            if is_square_setting_visible == False:  
                 if button_detail_rect.collidepoint(event.pos):
                     if is_square_detail_visible:
                         is_start_button_visible = True
