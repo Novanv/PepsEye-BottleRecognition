@@ -173,7 +173,7 @@ def MODULE_CHECK(image_path):
 
     LABEL_CHECK = LABEL_CHECK(image_path) # Lấy kết quả từ hàm kiểm tra vỏ chai 
     if 1 in LABEL_CHECK:                   # Nếu kết quả kiểm tra vỏ chai là lỗi, thêm giá trị 1 vào danh sách 'CHECK'
-        CHECK.append(1)
+        CHECK.append(3)
     else:                                   # Nếu kết quả kiểm tra vỏ chai là tốt, thêm giá trị 0 vào danh sách 'CHECK'
         CHECK.append(0)
 
