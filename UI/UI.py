@@ -135,13 +135,6 @@ text_waiting_time = ''
 #--------------------------------------------------------------        AI MODULE        ---------------------------------------------------------
 
 
-# Hàm check bottle = > return [0] = Good hoặc [1] = Error
-
-# Hàm check Label = > return [0] = Good hoặc [1] = Error
-
-# Hàm check water level = > return [0] = Good hoặc [1] = Error
-
-
 
 def MODULE_CHECK(image_path):
     # Đây là hàm thực thi các AI module
@@ -149,13 +142,14 @@ def MODULE_CHECK(image_path):
     # + Thực hiện kiểm tra Các biến trên để đưa lại kết quả cho CHECK để dẫn đến kết luận cuối cùng.
 
     CHECK = []
-    SIZE = (500,500) # Tất cả các ảnh đều resize về (500,500)
 
     # Biến check bottle = List giá trị trả về từ hàm Check bottle (image_path)
-    
-    # Biến check Label = List giá trị trả về từ hàm Check Label (image_path)
 
+    # Biến check Label = List giá trị trả về từ hàm Check Label (image_path)
+    
     # Biến check water level = List giá trị trả về từ hàm Check water level (image_path)
+
+
 
 
     return CHECK
