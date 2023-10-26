@@ -38,11 +38,11 @@ def CHECK_LABEL(image_path):
 
     # Nếu có nhãn lỗi ("ERROR") trong danh sách 'CHECK'
     if "ERROR" in CHECK:
-        CHECK_LABEL.append(1)  # Thêm nhãn '1' vào danh sách 'CHECK_LABEL'
+        CHECK_LABEL.append(3)  # Thêm nhãn '1' vào danh sách 'CHECK_LABEL'
     # Nếu không có nhãn lỗi ("ERROR") trong danh sách 'CHECK'
     else:
         CHECK_LABEL.append(0)  # Thêm nhãn '0' vào danh sách 'CHECK_LABEL'
 
     # Kết thúc hàm, trả về danh sách 'CHECK_LABEL'
     return CHECK_LABEL
-print(CHECK_LABEL("D:\A.I\PROJECT\Check_water\Group_3\image_product\good.jpg"))
+print(CHECK_LABEL("D:\A.I\PROJECT\Check_water\Group_3\image_product\error_label.jpg"))

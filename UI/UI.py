@@ -275,7 +275,7 @@ def BOTTLE_CHECK(image_path):
         CHECK.append(0)
     else:
         CHECK.append(1)
-
+        
     # Xét tỉ lệ chiều rộng thân trên với thân dưới
     if 0.98 <(width_1 / width_3) < 1.02:    # Thân trên và thân dưới có tỉ lệ chiều rộng xấp xỉ bằng 1
         CHECK.append(0)
@@ -351,6 +351,11 @@ def CHECK_LABEL(image_path):
 
     # Kết thúc hàm, trả về danh sách 'CHECK_LABEL'
     return CHECK_LABEL
+
+# Hàm check water level = > return [0] = Good hoặc [1] = Error
+
+
+
 
 
 # Hàm check water level = > return [0] = Good hoặc [1] = Error-------------------------------/
@@ -464,13 +469,13 @@ def MODULE_CHECK(image_path):
     if 1 in BOTTLE_CHECK:                   # Nếu kết quả kiểm tra vỏ chai là lỗi, thêm giá trị 1 vào danh sách 'CHECK'
         CHECK.append(1)
     else:                                   # Nếu kết quả kiểm tra vỏ chai là tốt, thêm giá trị 0 vào danh sách 'CHECK'
-        CHECK.append(0)                     
+        CHECK.append(0)       
 
 
     # Biến check Label = List giá trị trả về từ hàm Check Label (image_path)
     LABEL_CHECK = LABEL_CHECK(image_path) # Lấy kết quả từ hàm kiểm tra vỏ chai 
     if 1 in LABEL_CHECK:                   # Nếu kết quả kiểm tra vỏ chai là lỗi, thêm giá trị 1 vào danh sách 'CHECK'
-        CHECK.append(1)
+        CHECK.append(2)
     else:                                   # Nếu kết quả kiểm tra vỏ chai là tốt, thêm giá trị 0 vào danh sách 'CHECK'
         CHECK.append(0)
 
