@@ -22,18 +22,18 @@ font = pygame.font.Font(None, 36)
 border_radius_button = 30
 
 # Thiết lập camera
-camera = cv2.VideoCapture(1)
+camera = cv2.VideoCapture(0)
     
 # Bắt đầu luồng chụp ảnh
 capture_thread = None
 
 #Logo ))
-logo_fpt_path = os.path.join("image_set/logofptuniversity.png")
+logo_fpt_path = os.path.join("UI/image_set/logofptuniversity.png")
 logo_fpt_surface = pygame.image.load(logo_fpt_path)
 logo_fpt_surface = pygame.transform.scale(logo_fpt_surface, (150, 58))
 
 #Exit ))
-exit_path = os.path.join("image_set/exit.png")
+exit_path = os.path.join("UI/image_set/exit.png")
 exit_surface = pygame.image.load(exit_path)
 exit_surface = pygame.transform.scale(exit_surface, (40, 40))
 exit_clickable_area = pygame.Rect(20, screen_height - 70, 40, 40)
@@ -99,10 +99,9 @@ big_square_detail_color = (255, 255, 255)
 #--------------------------------------------------------------        AI MODULE        ---------------------------------------------------------
 
 
-# Hàm check bottle = > return [0] = Good hoặc [1] = Error
+# Hàm check bottle = > return [0] = Good hoặc [1] = Error -------------------------------/
+
 def BOTTLE_CHECK(image_path):
-    # Tạo một danh sách để check xem vỏ chai có lỗi không
-    CHECK = []
 
     # Đọc ảnh từ đường dẫn và gán cho biến 'img'
     img = cv2.imread(image_path)
@@ -152,12 +151,8 @@ def BOTTLE_CHECK(image_path):
     roi_content = img_roi[min_y:max_y, min_x:max_x] # Gán hình ảnh cắt ra theo 4 tọa độ cho biến 'roi_content'
 
     # Sau khi có được hình chữ nhật bao sát toàn bộ chai nước, ta có được chiều cao của chai nước tính bằng pixel, ở đây là 'roi_content.shape[0]'
-    #print("Height: ",roi_content.shape[0])
-    # Ta đặt ngưỡng cho chiều cao chai nước, nếu chiều cao nằm ngoài ngưỡng, ta thêm nhãn lỗi ("ERROR") vào danh sách 'CHECK'
-    if 410 < roi_content.shape[0] < 430:    # Cụ thể ở đây, ngưỡng dưới là 410 pixel và ngưỡng trên là 430 pixel cho chiều cao.
-        CHECK.append("GOOD")                # Thêm nhãn tốt ("GOOD") nếu chiều cao của chai nằm trong ngưỡng cho phép.
-    else:
-        CHECK.append("ERROR")               # Thêm nhãn lỗi ("ERROR") nếu chiều cao của chai nằm ngoài ngưỡng cho phép.
+    # Gán lại chiều cao chai nước chi biến 'height'
+    height = roi_content.shape[0]
 
 
     #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -200,13 +195,9 @@ def BOTTLE_CHECK(image_path):
         for point in contour_1: # Với mỗi điểm ảnh point trong đường viền contour, lấy tọa độ x và y của điểm ảnh đó
             x, y = point[0]
             max_x = max(max_x, x) # So sánh tọa độ x và y của mỗi điểm ảnh với 'max_x' và cập nhật nếu x lớn hơn, ở đây chỉ lấy ra chiều rộng lớn nhất 
-    #print(max_x)
-    # Đặt ngưỡng cho chiều rộng
-    if 150 < max_x < 170:       # Cụ thể ở đây, ngưỡng dưới là 150 pixel và ngưỡng trên là 170 pixel
-        CHECK.append("GOOD")    # Nếu chiều rộng nằm trong ngưỡng thì thêm nhãn tốt ("GOOD") vào trong danh sách 'CHECK'
-    else: 
-        CHECK.append("ERROR")   # Nếu chiều rộng nằm ngoài ngưỡng thì thêm nhãn lỗi ("ERROR") vào trong danh sách 'CHECK'
-
+    # Gán lại chiều rộng thân trên cho biến 'width_1'
+    width_1 = max_x
+    
 
     #-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
     # Check chiều rộng phần thân giữa:
@@ -235,13 +226,8 @@ def BOTTLE_CHECK(image_path):
         for point in contour_2: # Với mỗi điểm ảnh point trong đường viền contour, lấy tọa độ x và y của điểm ảnh đó
             x, y = point[0]
             max_x = max(max_x, x) # So sánh tọa độ x và y của mỗi điểm ảnh với 'max_x' và cập nhật nếu x lớn hơn, ở đây chỉ lấy ra chiều rộng lớn nhất 
-    #print(max_x)
-
-    # Đặt ngưỡng cho chiều rộng         
-    if 145 < max_x < 160:   # Cụ thể ở đây, ngưỡng dưới là 145 pixel và ngưỡng trên là 160 pixel
-        CHECK.append("GOOD")    # Nếu chiều rộng nằm trong ngưỡng thì thêm nhãn tốt ("GOOD") vào trong danh sách 'CHECK'
-    else: 
-        CHECK.append("ERROR")   # Nếu chiều rộng nằm ngoài ngưỡng thì thêm nhãn lỗi ("ERROR") vào trong danh sách 'CHECK'
+    # Gán lại chiều rộng thân giữa cho biến 'width_2'
+    width_2 = max_x
 
 
     #-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
@@ -271,37 +257,53 @@ def BOTTLE_CHECK(image_path):
         for point in contour_3: # Với mỗi điểm ảnh point trong đường viền contour, lấy tọa độ x và y của điểm ảnh đó
             x, y = point[0]
             max_x = max(max_x, x)   # So sánh tọa độ x và y của mỗi điểm ảnh với 'max_x' và cập nhật nếu x lớn hơn, ở đây chỉ lấy ra chiều rộng lớn nhất             
-    #print(max_x) 
+    # Gán lại chiều rộng thân dưới cho biến width_3 
+    width_3 = max_x
 
-    # Đặt ngưỡng cho chiều rộng  
-    if 150 < max_x < 170:   # Cụ thể ở đây, ngưỡng dưới là 150 pixel và ngưỡng trên là 170 pixel
-        CHECK.append("GOOD")    # Nếu chiều rộng nằm trong ngưỡng thì thêm nhãn tốt ("GOOD") vào trong danh sách 'CHECK'
-    else: 
-        CHECK.append("ERROR")   # Nếu chiều rộng nằm ngoài ngưỡng thì thêm nhãn lỗi ("ERROR") vào trong danh sách 'CHECK'
-
+    
 
     #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    # Cuối cùng, check xem thử trong danh sách 'CHECK' có nhãn lỗi ("ERROR") hay không
-
+    # Cuối cùng, check xem thử tỉ lệ chai nước có lỗi hay không.
     # Tạo một danh sách để tổng kết xem vỏ chai có lỗi hay không
     BOTTLE_CHECK = []
 
-    # Nếu có nhãn lỗi ("ERROR") trong danh sách 'CHECK'
-    if "ERROR" in CHECK:
-        BOTTLE_CHECK.append(1)  # Thêm nhãn '1' vào danh sách 'BOTTLE_CHECK'
-    # Nếu không có nhãn lỗi ("ERROR") trong danh sách 'CHECK'
-    else:                           
-        BOTTLE_CHECK.append(0)  # Thêm nhãn '0' vào danh sách 'BOTTLE_CHECK'
-    
-    # Kết thúc hàm, trả về danh sách 'BOTTLE_CHECK'
+    # Tạo một danh sách để check xem từng tỉ lệ cho chiều rộng và chiều cao của vỏ chai.
+    CHECK = []
+
+    # Xét tỉ lệ chiều rộng thân trên với thân giữa
+    if (width_1 / width_2) > 1: # Thân trên luôn luôn lớn hơn thân giữa
+        CHECK.append(0)
+    else:
+        CHECK.append(1)
+        
+    # Xét tỉ lệ chiều rộng thân trên với thân dưới
+    if 0.98 <(width_1 / width_3) < 1.02:    # Thân trên và thân dưới có tỉ lệ chiều rộng xấp xỉ bằng 1
+        CHECK.append(0)
+    else:
+        CHECK.append(1)
+
+    # Xét tỉ lệ chiều cao với chiều rộng 
+    if 2.63 < (height / width_1) < 2.67:    # Tỉ lệ xấp xỉ của chiều cao và chiều rộng thân trên 
+        CHECK.append(0)
+    else:
+        CHECK.append(1)
+
+    if 2.79 < (height / width_2) < 2.83:    # Tỉ lệ xấp xỉ của chiều cao và chiều rộng thân giữa 
+        CHECK.append(0)
+    else:
+        CHECK.append(1)
+
+    # Xét xem có lỗi tỉ lệ chai nước không. 
+    BOTTLE_CHECK = []
+    if 1 in CHECK :             # Nếu có thì trả về cho danh sách kết quả 'BOTTLE_CHECK' là 1 
+        BOTTLE_CHECK.append(1)
+    else:                       # Nếu không thì trả về cho danh sách kết quả 'BOTTLE_CHECK' là 0
+        BOTTLE_CHECK.append(0)  
     return BOTTLE_CHECK
 
 
 
-
-
-
-# Hàm check Label = > return [0] = Good hoặc [1] = Error
+# Hàm check Label = > return [0] = Good hoặc [1] = Error -------------------------------/
 def CHECK_LABEL(image_path):
     # Tạo một danh sách để check xem vỏ chai có lỗi không
     CHECK = []
@@ -356,6 +358,103 @@ def CHECK_LABEL(image_path):
 
 
 
+# Hàm check water level = > return [0] = Good hoặc [1] = Error-------------------------------/
+def WATER_CHECK(image_path):
+    # Tạo list để chứa các giá trị được thêm vào từ việc xử lí thông tin good hoặc error
+    CHECK = []
+    
+    # Đặt kích thước tiêu chuẩn
+    SIZE = (500, 500)
+    
+    # Độc thông tin ảnh từ đường dẫn
+    image = cv2.imread(image_path)
+    
+    # Thực hiện resize theo kích thước đã quy định ở trên
+    image = cv2.resize(image, SIZE)
+    
+    # Chọn vùng để trị, giới hạn vùng để tránh ảnh hưởng của các đường biên, gây cho model phát hiện các cạnh bị sai
+    img_roi = image[0:500, 100:400]
+    
+    # Áp dụng Gaussian Blur
+    image_GauBlur = cv2.GaussianBlur(img_roi, (3, 3), 1)
+    
+    # Chuyển đổi ảnh sang ảnh grayscale
+    gray = cv2.cvtColor(image_GauBlur, cv2.COLOR_BGR2GRAY)
+    
+    # Áp dụng phép Canny để phát hiện cạnh
+    edges = cv2.Canny(gray, 30, 90)
+    
+    # Tìm các đường biên sau khi làm mịn
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # Tìm đường viền cao nhất, thấp nhất, và vị trí rộng nhất 2 bên để thực hiện chức năng object detector đối tượng
+    # trên một background trắng, tăng tính nổi bậc cho đối tượng - chai nước pepsi
+    max_y = min_y = contours[0][0][0][1]
+    max_x = min_x = contours[0][0][0][0]
+
+    # Duyệt qua toàn bộ danh sách contours. Với mỗi đường viền, duyệt qua toàn bộ danh sách các điểm ảnh trong đường viền đó
+    for contour in contours:
+        for point in contour: # Với mỗi điểm ảnh point trong đường viền contour, lấy tọa độ x và y của điểm ảnh đó
+            x, y = point[0]
+            max_x = max(max_x, x)   # So sánh tọa độ x và y của mỗi điểm ảnh với 'max_x', 'min_x', 'max_y', và 'min_y'
+            min_x = min(min_x, x)   # Cập nhật giá trị tối đa và tối thiểu. 
+            max_y = max(max_y, y)   # Khi có một điểm ảnh có tọa độ x hoặc y lớn hơn tối đa hoặc nhỏ hơn tối thiểu hiện tại, cập nhật giá trị tương ứng.
+            min_y = min(min_y, y)   # Mục đích của việc này là lấy ra 4 tọa độ hình chữ nhật bao sát hết chai nước (bounding box)
+
+
+    # Sau khi có được 4 tọa độ bao sát hết chai nước (bounding box), cắt ra hình chữ nhật theo 4 tọa độ
+    roi_content = image_GauBlur[min_y:max_y, min_x:max_x]   # Gán hình ảnh cắt ra theo 4 tọa độ cho biến 'roi_content'
+    # --->> Lấy được box của đối tượng.
+    
+    # Thực hiện region split, theo ngưỡng màu đen. Vì đặt điểm nước của chai peepsi có màu đen, khác biệt hoàn toàn với các đối tượng khác
+    # Thực hiện region split theo màu "Đen" là cách tối ưu nhất để lấy chính xác vùng nước.
+    hsv_image = cv2.cvtColor(roi_content, cv2.COLOR_BGR2HSV)
+    target_color_low = np.array([0, 0, 0]) # Ngưỡng min của màu đen
+    target_color_high = np.array([180, 255, 30])    # Ngưỡng max của màu đen
+    color_mask = cv2.inRange(hsv_image, target_color_low, target_color_high) # Thực hiện phân vùng theo màu đen
+    # -->>> Lấy được chính xác vừng có nuóc
+    
+    # Lật vùng nước sang 2 màu trắng và đen": Trong đó đen mà nơi có vùng nước, trắng là các đối tượng khác
+    # Bây giờ trong ảnh chỉ còn tồn tại 2 màu đen và trắng và biết chính xác nước đang ở đâu
+    color_mask = cv2.bitwise_not(color_mask)
+    # Lấy kích thước của box 
+    WIDTH,HEIGHT = color_mask.shape[1],color_mask.shape[0] # Chiều rộng, chiều dài
+
+    # Tạo một hình chữ nhật chỉ định khu vực mực nước chuẩn. 
+    X_ROI_WATER, Y_ROI_WATER = 0, int((0.235*HEIGHT))   # Đặt vị trí (x,y) góc trái trên cùng của hình chữ nhật 
+    size_x_ROI_WATER = WIDTH                            # Chiều rộng của vùng kiểm tra mực nước
+    size_y_ROI_WATER = int(0.04*HEIGHT)                 # Chiều cao của của vùng kiểm tra mực nước
+    ROI_WATER = color_mask[Y_ROI_WATER : Y_ROI_WATER + size_y_ROI_WATER,X_ROI_WATER:X_ROI_WATER + size_x_ROI_WATER] # Thiết lập vùng kiểm tra mực nước
+
+    # Tạo một hình chữ Nhật kiểm tra lượng nước vượt mức giới hạn nếu kiểm tra trong vùng CHUẨN đạt thì phải kiểm tra nước có bị quá mức hay không
+    # Vùng này nằm trên vùng "Chuẩn"
+    # Nếu không vượt quá thì sẽ đạt # Ngược lại sẽ lỗi 
+    X_ROI_WATER_OUT, Y_ROI_WATER_OUT = 0,(Y_ROI_WATER - int(0.04*HEIGHT))   # Đặt vị trí (x,y) góc trái trên cùng của hình chữ nhật 
+    size_x_ROI_WATER_OUT = WIDTH                                            # Chiều rộng của vùng kiểm tra mực nước
+    size_y_ROI_WATER_OUT = int(0.04*HEIGHT)                                 # Chiều cao của của vùng kiểm tra mực nước
+    ROI_WATER_OUT = color_mask[Y_ROI_WATER_OUT : Y_ROI_WATER_OUT + size_y_ROI_WATER_OUT,X_ROI_WATER_OUT:X_ROI_WATER_OUT + size_x_ROI_WATER_OUT] # # Thiết lập vùng kiểm tra mực nước
+
+    if np.any(ROI_WATER_OUT != 255):
+        CHECK.append("ERROR") 
+    # Kiểm tra xem có pixel 225 trong khu vực mực nước được chỉ định không, 
+    if np.any(ROI_WATER != 255):
+        CHECK.append("GOOD")
+    else:
+        CHECK.append("ERROR")
+
+    #-----------------------------------------------------------------------------------------------------------------------------------------------/
+    # Cuối cùng, check xem thử trong danh sách 'CHECK' có nhãn lỗi ("ERROR") hay không
+    
+    # Tạo một danh sách để tổng kết xem mực nước có lỗi hay không = > danh sách này sẽ chỉ chứa [0] hoặc [1]
+    WATER_CHECK = []
+    
+    if "ERROR" in CHECK:
+        WATER_CHECK.append(1) # Theo quy ước: 1 -> Lỗi
+    else:
+        WATER_CHECK.append(0) # 0 -> tốt
+
+    # Kết thúc hàm, trả về danh sách 'WATER_CHECK'
+    return WATER_CHECK
+
 
 
 def MODULE_CHECK(image_path):
@@ -382,9 +481,11 @@ def MODULE_CHECK(image_path):
 
 
     # Biến check water level = List giá trị trả về từ hàm Check water level (image_path)
-
-
-
+    WATER_CHECK = WATER_CHECK(image_path) # Lấy kết quả từ hàm kiểm tra  
+    if 1 in WATER_CHECK:                   # Nếu kết quả kiểm tra water level là lỗi, thêm giá trị 2 vào danh sách 'CHECK'
+        CHECK.append(3)
+    else:                                   # Nếu kết quả kiểm tra water level là tốt, thêm giá trị 0 vào danh sách 'CHECK'
+        CHECK.append(0)
     
 
     return CHECK
