@@ -22,7 +22,7 @@ font = pygame.font.Font(None, 36)
 border_radius_button = 30
 
 # Thiết lập camera
-camera = cv2.VideoCapture(0)
+camera = cv2.VideoCapture(1)
     
 # Bắt đầu luồng chụp ảnh
 capture_thread = None
