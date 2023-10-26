@@ -137,9 +137,10 @@ text_waiting_time = ''
 
 # Hàm check bottle = > return [0] = Good hoặc [1] = Error
 
+# Hàm check Label = > return [0] = Good hoặc [1] = Error
+
 # Hàm check water level = > return [0] = Good hoặc [1] = Error
 
-# Hàm check Label = > return [0] = Good hoặc [1] = Error
 
 
 def MODULE_CHECK(image_path):
@@ -151,12 +152,11 @@ def MODULE_CHECK(image_path):
     SIZE = (500,500) # Tất cả các ảnh đều resize về (500,500)
 
     # Biến check bottle = List giá trị trả về từ hàm Check bottle (image_path)
+    
+    # Biến check Label = List giá trị trả về từ hàm Check Label (image_path)
 
     # Biến check water level = List giá trị trả về từ hàm Check water level (image_path)
 
-    # Biến check Label = List giá trị trả về từ hàm Check Label (image_path)
-
-    
 
     return CHECK
 
