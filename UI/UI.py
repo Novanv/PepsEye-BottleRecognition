@@ -296,7 +296,8 @@ def BOTTLE_CHECK(image_path):
     # Kết thúc hàm, trả về danh sách 'BOTTLE_CHECK'
     return BOTTLE_CHECK
 
-# Hàm check water level = > return [0] = Good hoặc [1] = Error
+
+
 
 
 
@@ -349,6 +350,11 @@ def CHECK_LABEL(image_path):
     # Kết thúc hàm, trả về danh sách 'CHECK_LABEL'
     return CHECK_LABEL
 
+# Hàm check water level = > return [0] = Good hoặc [1] = Error
+
+
+
+
 
 
 
@@ -364,17 +370,20 @@ def MODULE_CHECK(image_path):
     if 1 in BOTTLE_CHECK:                   # Nếu kết quả kiểm tra vỏ chai là lỗi, thêm giá trị 1 vào danh sách 'CHECK'
         CHECK.append(1)
     else:                                   # Nếu kết quả kiểm tra vỏ chai là tốt, thêm giá trị 0 vào danh sách 'CHECK'
-        CHECK.append(0)                     
+        CHECK.append(0)       
+
+
+    # Biến check Label = List giá trị trả về từ hàm Check Label (image_path)
+    LABEL_CHECK = LABEL_CHECK(image_path) # Lấy kết quả từ hàm kiểm tra vỏ chai 
+    if 1 in LABEL_CHECK:                   # Nếu kết quả kiểm tra vỏ chai là lỗi, thêm giá trị 1 vào danh sách 'CHECK'
+        CHECK.append(2)
+    else:                                   # Nếu kết quả kiểm tra vỏ chai là tốt, thêm giá trị 0 vào danh sách 'CHECK'
+        CHECK.append(0)
+
 
     # Biến check water level = List giá trị trả về từ hàm Check water level (image_path)
 
-    # Biến check Label = List giá trị trả về từ hàm Check Label (image_path)
 
-    LABEL_CHECK = LABEL_CHECK(image_path) # Lấy kết quả từ hàm kiểm tra vỏ chai 
-    if 1 in LABEL_CHECK:                   # Nếu kết quả kiểm tra vỏ chai là lỗi, thêm giá trị 1 vào danh sách 'CHECK'
-        CHECK.append(3)
-    else:                                   # Nếu kết quả kiểm tra vỏ chai là tốt, thêm giá trị 0 vào danh sách 'CHECK'
-        CHECK.append(0)
 
     
 
