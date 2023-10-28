@@ -496,24 +496,24 @@ def MODULE_CHECK(image_path):
     CHECK = []
 
     # Biến check bottle = List giá trị trả về từ hàm Check bottle (image_path)
-    BOTTLE_CHECK = BOTTLE_CHECK(image_path) # Lấy kết quả từ hàm kiểm tra vỏ chai 
-    if 1 in BOTTLE_CHECK:                   # Nếu kết quả kiểm tra vỏ chai là lỗi, thêm giá trị 1 vào danh sách 'CHECK'
+    BOTTLE_CHECK_ = BOTTLE_CHECK(image_path) # Lấy kết quả từ hàm kiểm tra vỏ chai 
+    if 1 in BOTTLE_CHECK_:                   # Nếu kết quả kiểm tra vỏ chai là lỗi, thêm giá trị 1 vào danh sách 'CHECK'
         CHECK.append(1)
     else:                                   # Nếu kết quả kiểm tra vỏ chai là tốt, thêm giá trị 0 vào danh sách 'CHECK'
         CHECK.append(0)       
 
 
     # Biến check Label = List giá trị trả về từ hàm Check Label (image_path)
-    LABEL_CHECK = LABEL_CHECK(image_path) # Lấy kết quả từ hàm kiểm tra vỏ chai 
-    if 1 in LABEL_CHECK:                   # Nếu kết quả kiểm tra vỏ chai là lỗi, thêm giá trị 1 vào danh sách 'CHECK'
+    LABEL_CHECK_ = LABEL_CHECK(image_path) # Lấy kết quả từ hàm kiểm tra vỏ chai 
+    if 1 in LABEL_CHECK_:                   # Nếu kết quả kiểm tra vỏ chai là lỗi, thêm giá trị 1 vào danh sách 'CHECK'
         CHECK.append(2)
     else:                                   # Nếu kết quả kiểm tra vỏ chai là tốt, thêm giá trị 0 vào danh sách 'CHECK'
         CHECK.append(0)
 
         
     # Biến check water level = List giá trị trả về từ hàm Check water level (image_path)
-    WATER_CHECK = WATER_CHECK(image_path) # Lấy kết quả từ hàm kiểm tra  
-    if 1 in WATER_CHECK:                   # Nếu kết quả kiểm tra water level là lỗi, thêm giá trị 2 vào danh sách 'CHECK'
+    WATER_CHECK_ = WATER_CHECK(image_path) # Lấy kết quả từ hàm kiểm tra  
+    if 1 in WATER_CHECK_:                   # Nếu kết quả kiểm tra water level là lỗi, thêm giá trị 2 vào danh sách 'CHECK'
         CHECK.append(3)
     else:                                   # Nếu kết quả kiểm tra water level là tốt, thêm giá trị 0 vào danh sách 'CHECK'
         CHECK.append(0)
