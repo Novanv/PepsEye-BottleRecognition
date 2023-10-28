@@ -5,6 +5,7 @@ import os
 from threading import Timer
 import numpy as np
 import pandas as pd
+import os
 
 pygame.init()
 
@@ -130,15 +131,37 @@ color_active = pygame.Color('dodgerblue2')
 color_input_box_wt = color_inactive
 text_waiting_time = ''
 
-# On button set boot time
+#Thẻ cha chứa On button và OFF button phần Boot time trong setting
+div_ON_OFF_boot = pygame.draw.rect(screen,(255, 0, 255),(1050,187,200,40))
+
+## ---------On button set boot time
 boot_time_text_on = font.render("ON", True, (0,0,0))
 boot_time_rect_on = boot_time_text_on.get_rect(center=(1096,210))
 boot_time_rect_on_box = pygame.draw.rect(screen,(255, 255, 255),(1050,187,100,40))
 
-# OFF button set boot time
+## ----------OFF button set boot time
 boot_time_text_off = font.render("OFF", True, (0,0,0))
-boot_time_rect_off = boot_time_text_off.get_rect(center=(1096,260))
-boot_time_rect_off_box = pygame.draw.rect(screen,(255, 255, 255),(1050,237,100,40))
+boot_time_rect_off = boot_time_text_off.get_rect(center=(1200,210))
+boot_time_rect_off_box = pygame.draw.rect(screen,(255, 255, 255),(1150,187,100,40))
+
+#Thẻ cha chứa On button và OFF button phần sample data trong setting
+div_ON_OFF_sample = pygame.draw.rect(screen,(255, 0, 255),(1050,267,200,40))
+
+## ------------On button set sample data
+sample_data_text_on = font.render("ON", True, (0,0,0))
+sample_data_rect_on = sample_data_text_on.get_rect(center=(1096,289))
+sample_data_rect_on_box = pygame.draw.rect(screen,(255, 255, 255),(1050,267,100,40))
+
+## -------------OFF button set sample data
+sample_data_text_off = font.render("OFF", True, (0,0,0))
+sample_data_rect_off = sample_data_text_off.get_rect(center=(1200,289))
+sample_data_rect_off_box = pygame.draw.rect(screen,(255, 255, 255),(1150,267,100,40))
+
+# Button capture sample
+button_capture_sample_rect = pygame.Rect(400, 600, 120, 50)
+button_capture_sample_color = (0,0,128)
+button_capture_sample_text = font.render("capture", True, (255,255,255))
+text_capture_sample_rect = button_capture_sample_text.get_rect(center=button_capture_sample_rect.center)
 
 
 #--------------------------------------------------------------        AI MODULE        ---------------------------------------------------------
@@ -193,6 +216,7 @@ input_text_waiting_time_active = False
 is_error_wt = False
 is_starting_up = False
 is_boot_time = True
+is_sample_data = False
 
 # Bắt đầu luồng chụp ảnh
 capture_thread = None
@@ -203,6 +227,17 @@ def is_valid_input(text):
         return True
     else:
         return False
+
+# Tách riêng hàm chụp ảnh thủ công, hàm này thực hiện chụp ảnh khi người dùng bấm nước CAPTURE trong mục setting để tạo bộ ảnh sample một cách thủ công.
+def capture_sample():
+    ret, frame = camera.read()
+    folder_path = "sample_data"
+    if ret:
+        item_count = len(os.listdir(folder_path))
+        sample_image = "sample_" + str(item_count + 1) + ".jpg"
+        path_sample_image = folder_path + "/"+ sample_image
+        cv2.imwrite(path_sample_image,frame)
+
 
 # Hàm chụp ảnh và lưu vào thư mục hiện tại
 def capture_frame():
@@ -273,13 +308,15 @@ while running:
                 
               
             if setting_clickable_area.collidepoint(event.pos):
-                is_square_setting_visible = True
-                is_exit_setting_button_visible = not is_exit_setting_button_visible
+                if is_sample_data == False:
+                    is_square_setting_visible = True
+                    is_exit_setting_button_visible = True
             
             if exit_setting_clickable_area.collidepoint(event.pos):
-                if is_square_setting_visible:    
-                    is_square_setting_visible = False
-                    is_exit_setting_button_visible = not is_exit_setting_button_visible
+                if is_sample_data == False:
+                    if is_square_setting_visible:    
+                        is_square_setting_visible = False
+                        is_exit_setting_button_visible = False
             
             if is_square_setting_visible:
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -301,7 +338,7 @@ while running:
                         button_detail_text = font.render(" BACK", True, (255, 255, 255))
                     is_square_detail_visible = not is_square_detail_visible
             
-            # diều kiện kết thúc app    
+            # điều kiện kết thúc app    
             if  exit_clickable_area.collidepoint(event.pos):
                 running = False  
                 
@@ -316,10 +353,20 @@ while running:
 
                 if boot_time_rect_on_box.collidepoint(event.pos):
                     is_boot_time = True
-                    
                 if boot_time_rect_off_box.collidepoint(event.pos):
                     is_boot_time = False
-                    
+                
+                if sample_data_rect_on_box.collidepoint(event.pos):
+                    is_sample_data = True
+                    is_exit_setting_button_visible = False
+                if sample_data_rect_off_box.collidepoint(event.pos):
+                    is_sample_data = False
+                    is_exit_setting_button_visible = True
+            
+            if button_capture_sample_rect.collidepoint(event.pos):
+                if is_square_setting_visible ==True and is_sample_data == True:
+                    capture_sample()
+                      
         if event.type == pygame.KEYDOWN:
             if input_text_waiting_time_active:
                 if event.key == pygame.K_BACKSPACE:
@@ -450,7 +497,8 @@ while running:
         if is_square_setting_visible:
             pygame.draw.rect(screen, big_square_setting_color, big_square_setting_rect)
             pygame.draw.rect(screen, (0,0,128), big_square_setting_rect, 3)
-            screen.blit(exit_setting_surface,(710,10))
+            if is_exit_setting_button_visible:
+                screen.blit(exit_setting_surface,(710,10))
             
             if is_started:
                 font_noti_submit_text = pygame.font.Font(None, 20)
@@ -498,24 +546,69 @@ while running:
             
             screen.blit(boot_time_text_off,  boot_time_rect_off)
             
+            pygame.draw.rect(screen, (0,0,0), div_ON_OFF_boot, 3)
+            
             if is_boot_time == True:
-                
                 boot_time_var = 5
                 
+                boot_time_text_on = font.render("ON", True, (255,0,0))
+                boot_time_text_off = font.render("OFF", True, (0,0,0))
+                
                 boot_time_text_status = font.render("ON", True, (255,0,255))
-                boot_time_rect = boot_time_text_status.get_rect(center=(920,210))
-                pygame.draw.rect(screen, (255,0,0), boot_time_rect_on_box, 3)
+                boot_time_rect = boot_time_text_status.get_rect(center=(950,210))
+                pygame.draw.rect(screen, (255,0,0), boot_time_rect_on_box,3)
                 screen.blit(boot_time_text_status,  boot_time_rect)
 
             else:
-                
                 boot_time_var = 0
                 
+                boot_time_text_on = font.render("ON", True, (0,0,0))
+                boot_time_text_off = font.render("OFF", True, (255,0,0))
+                
                 boot_time_text_status = font.render("OFF", True, (255,0,255))
-                boot_time_rect = boot_time_text_status.get_rect(center=(920,210))
-                pygame.draw.rect(screen, (255,0,0), boot_time_rect_off_box, 3)
+                boot_time_rect = boot_time_text_status.get_rect(center=(950,210))
+                pygame.draw.rect(screen, (255,0,0), boot_time_rect_off_box,3)
                 screen.blit(boot_time_text_status,  boot_time_rect)
-
+                
+            #---------------------- Phần CAPTURE - Sample data -------------------------------------------------------/
+            
+            sample_data_text = font.render("Sample data: ", True, (0, 0, 0))
+            sample_data_rect = sample_data_text.get_rect(center=(798,290))
+            screen.blit(sample_data_text, sample_data_rect)
+            
+            screen.blit(sample_data_text_on, sample_data_rect_on)
+            
+            screen.blit(sample_data_text_off,  sample_data_rect_off)
+            
+            pygame.draw.rect(screen, (0,0,0), div_ON_OFF_sample, 3)
+            
+            if  is_sample_data: 
+                sample_data_text_on = font.render("ON", True, (255,0,0))
+                sample_data_text_off = font.render("OFF", True, (0,0,0))
+                
+                sample_data_text_status = font.render("ON", True, (255,0,255))
+                sample_data_rect = sample_data_text_status.get_rect(center=(950,290))
+                pygame.draw.rect(screen, (255,0,0), sample_data_rect_on_box,3)
+                screen.blit(sample_data_text_status,  sample_data_rect)
+                
+                pygame.draw.rect(screen, button_capture_sample_color, button_capture_sample_rect, border_radius = border_radius_button)
+                screen.blit(button_capture_sample_text, text_capture_sample_rect)
+                
+                font_noti_sample_data_text = pygame.font.Font(None, 26)
+                noti_sample_data_text = font_noti_sample_data_text.render("Turn Off Sample data to Exit the settings", True, (255, 0, 0))
+                noti_sample_data_rect = noti_sample_data_text.get_rect(center=(screen_width-395, 20))
+                screen.blit(noti_sample_data_text, noti_sample_data_rect)
+                
+            else:
+                sample_data_text_on = font.render("ON", True, (0,0,0))
+                sample_data_text_off = font.render("OFF", True, (255,0,0))
+                
+                sample_data_text_status = font.render("OFF", True, (255,0,255))
+                sample_data_rect = sample_data_text_status.get_rect(center=(950,290))
+                pygame.draw.rect(screen, (255,0,0), sample_data_rect_off_box,3)
+                screen.blit(sample_data_text_status,  sample_data_rect)
+                
+                   
             if is_error_wt:
                 font_error_wt_text = pygame.font.Font(None, 18)
                 error_wt_text = font_error_wt_text.render("Only numbers < 100", True, (255, 0, 0))
