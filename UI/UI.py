@@ -130,6 +130,15 @@ color_active = pygame.Color('dodgerblue2')
 color_input_box_wt = color_inactive
 text_waiting_time = ''
 
+# On button set boot time
+boot_time_text_on = font.render("ON", True, (0,0,0))
+boot_time_rect_on = boot_time_text_on.get_rect(center=(1096,210))
+boot_time_rect_on_box = pygame.draw.rect(screen,(255, 255, 255),(1050,187,100,40))
+
+# OFF button set boot time
+boot_time_text_off = font.render("OFF", True, (0,0,0))
+boot_time_rect_off = boot_time_text_off.get_rect(center=(1096,260))
+boot_time_rect_off_box = pygame.draw.rect(screen,(255, 255, 255),(1050,237,100,40))
 
 
 #--------------------------------------------------------------        AI MODULE        ---------------------------------------------------------
@@ -149,7 +158,6 @@ def MODULE_CHECK(image_path):
     # + Thực hiện kiểm tra Các biến trên để đưa lại kết quả cho CHECK để dẫn đến kết luận cuối cùng.
 
     CHECK = []
-    SIZE = (500,500) # Tất cả các ảnh đều resize về (500,500)
 
     # Biến check bottle = List giá trị trả về từ hàm Check bottle (image_path)
     
@@ -163,6 +171,32 @@ def MODULE_CHECK(image_path):
 # #-----------------------------------------------------------------------------------------------------------------------------------------------
 
 
+# # --------------------------------------------Các biến kểm soát------------------------------------------------------------/
+TYPE_ERROR = []
+
+Timer_wait = 0
+waiting_time_var = 5 # Biến kiểm soát thời gian đợi để chụp ảnh tiếp theo
+boot_time_var = 5 # Biến kiểm soát thời gian boot
+
+# Biến để kiểm soát
+is_csv = False
+is_countdown = False
+capture_image = False
+is_square_detail_visible = False
+is_square_setting_visible = False
+is_detail_button_visible = True
+is_start_button_visible = True
+is_exit_setting_button_visible = False
+is_started = False
+running = True
+input_text_waiting_time_active = False
+is_error_wt = False
+is_starting_up = False
+is_boot_time = True
+
+# Bắt đầu luồng chụp ảnh
+capture_thread = None
+
 def is_valid_input(text):
     # Hàm này kiểm tra xem chuỗi nhập vào chỉ chứa số hay không
     if (len(text) < 3) and (text.isdigit() == True):
@@ -170,10 +204,6 @@ def is_valid_input(text):
     else:
         return False
 
-TYPE_ERROR = []
-is_csv = False
-is_countdown = False
-Timer_wait = 0
 # Hàm chụp ảnh và lưu vào thư mục hiện tại
 def capture_frame():
     # Hàm thực hiện việc chụp ảnh
@@ -192,7 +222,7 @@ def capture_frame():
         return list_error
 
 # Hàm để chạy đồng hồ đếm và chụp ảnh sau mỗi 5 giây
-waiting_time_var = 5 #Biến kiểm soát thời gian đợi để chụp ảnh tiếp theo
+
 
 def capture_loop():
 
@@ -201,28 +231,14 @@ def capture_loop():
     global capture_image
     global TYPE_ERROR
     global Timer_wait
+    global is_starting_up
     while capture_image:
         TYPE_ERROR = capture_frame()
         Timer_wait = pygame.time.get_ticks()
         is_countdown = True
+        is_starting_up = False
         pygame.time.wait(waiting_time_var*1000)  # Chờ 5 giây
 
-
-# Bắt đầu luồng chụp ảnh
-capture_thread = None
-
-# Biến để kiểm soát
-
-capture_image = False
-is_square_detail_visible = False
-is_square_setting_visible = False
-is_detail_button_visible = True
-is_start_button_visible = True
-is_exit_setting_button_visible = False
-is_started = False
-running = True
-input_text_waiting_time_active = False
-is_error_wt = False
 
 # Phần thân chính chạy app-------------------------------------------------------------------------------------------------------------------|
 
@@ -238,10 +254,12 @@ while running:
                     is_detail_button_visible = True
                     button_start_text = font.render("START", True, (255, 255, 255))
                     
+                    is_starting_up = False
                     capture_image = False
                     is_countdown = False
                     capture_thread.cancel()
                 else:
+                    is_starting_up = True
                     status_light_color = (0,255,0)
                     button_start_color = (255, 0, 0)  # Màu đỏ
                     is_detail_button_visible = False
@@ -249,7 +267,7 @@ while running:
                     
                     if not capture_image:
                         capture_image = True
-                        capture_thread = Timer(5, capture_loop)  # Sử dụng Timer để tạo một luồng mới
+                        capture_thread = Timer(boot_time_var, capture_loop)  # Sử dụng Timer để tạo một luồng mới
                         capture_thread.start()    
                 is_started = not is_started
                 
@@ -295,7 +313,13 @@ while running:
                     else:
                         is_error_wt = True
                     text_waiting_time = ''
-        
+
+                if boot_time_rect_on_box.collidepoint(event.pos):
+                    is_boot_time = True
+                    
+                if boot_time_rect_off_box.collidepoint(event.pos):
+                    is_boot_time = False
+                    
         if event.type == pygame.KEYDOWN:
             if input_text_waiting_time_active:
                 if event.key == pygame.K_BACKSPACE:
@@ -319,6 +343,12 @@ while running:
         pygame.draw.rect(screen, big_square_color, big_square_rect)
         pygame.draw.rect(screen, (0,0,128), big_square_rect, 3)
         
+        # signal starting up 
+        if is_starting_up:
+            font_starting_up_text = pygame.font.Font(None, 36)
+            starting_up_text = font_starting_up_text.render("...", True, (255, 0, 0))
+            starting_up_rect = starting_up_text.get_rect(center=(430, 557))
+            screen.blit(starting_up_text, starting_up_rect)
         
         if len(TYPE_ERROR) > 0:
             #image Show
@@ -433,10 +463,12 @@ while running:
                 screen.blit(button_submit_time_text, text_submit_time_rect)
             
             # Các thành phàn trong ô settings
+            # ----------- Phần setting title ----------------------------------------------------/
             title_setting_text = font.render("SETTINGS", True, (255, 0, 0))
             title_setting_rect = title_setting_text.get_rect(center=(980, 80))
             screen.blit(title_setting_text, title_setting_rect)
             
+            # ----------- Phần set waiting time ----------------------------------------------/
             waiting_time_text = font.render("Waiting time: ", True, (0, 0, 0))
             waiting_time_rect = waiting_time_text.get_rect(center=(800,130))
             screen.blit(waiting_time_text, waiting_time_rect)
@@ -457,6 +489,33 @@ while running:
             screen.blit(txt_surface, (input_box.x+10, text_y))
             pygame.draw.rect(screen, color_input_box_wt, input_box, 2)
             
+            # -------------------Phần set start up time --------------------------------------------/
+            boost_time_text = font.render("Boot time: ", True, (0, 0, 0))
+            boost_time_rect = boost_time_text.get_rect(center=(780,210))
+            screen.blit(boost_time_text, boost_time_rect)
+            
+            screen.blit(boot_time_text_on, boot_time_rect_on)
+            
+            screen.blit(boot_time_text_off,  boot_time_rect_off)
+            
+            if is_boot_time == True:
+                
+                boot_time_var = 5
+                
+                boot_time_text_status = font.render("ON", True, (255,0,255))
+                boot_time_rect = boot_time_text_status.get_rect(center=(920,210))
+                pygame.draw.rect(screen, (255,0,0), boot_time_rect_on_box, 3)
+                screen.blit(boot_time_text_status,  boot_time_rect)
+
+            else:
+                
+                boot_time_var = 0
+                
+                boot_time_text_status = font.render("OFF", True, (255,0,255))
+                boot_time_rect = boot_time_text_status.get_rect(center=(920,210))
+                pygame.draw.rect(screen, (255,0,0), boot_time_rect_off_box, 3)
+                screen.blit(boot_time_text_status,  boot_time_rect)
+
             if is_error_wt:
                 font_error_wt_text = pygame.font.Font(None, 18)
                 error_wt_text = font_error_wt_text.render("Only numbers < 100", True, (255, 0, 0))
@@ -492,6 +551,7 @@ while running:
             error_info_error_text = font.render(TOTAL_ERROR_content, True, error_info_color)
             error_info_error_rect = button_detail_text.get_rect(center=((screen_width - 440), 270))
             screen.blit(error_info_error_text, error_info_error_rect)
+
             
         if is_countdown:
             elapsed_time = (pygame.time.get_ticks() - Timer_wait) // 1000
