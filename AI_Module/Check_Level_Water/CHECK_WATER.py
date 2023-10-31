@@ -6,7 +6,7 @@ import numpy as np
 SIZE = (500,500)
 CHECK = []
 
-image_path = "image_product/error_w_l.jpg"
+image_path = r"D:\A.I\PROJECT\Check_water\Group_3\image data\b1.jpg"
 image = cv2.imread(image_path)
 
 image = cv2.resize(image,SIZE)
