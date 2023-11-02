@@ -132,7 +132,6 @@ color_active = pygame.Color('dodgerblue2')
 color_input_box_wt = color_inactive
 text_waiting_time = ''
 
-<<<<<<< HEAD
 #Thẻ cha chứa On button và OFF button phần Boot time trong setting
 div_ON_OFF_boot = pygame.draw.rect(screen,(255, 0, 255),(1050,187,200,40))
 
@@ -166,8 +165,6 @@ button_capture_sample_text = font.render("capture", True, (255,255,255))
 text_capture_sample_rect = button_capture_sample_text.get_rect(center=button_capture_sample_rect.center)
 
 
-=======
->>>>>>> 05d733bdc7e3ce6af10e0283ada6d0f186a2919e
 #--------------------------------------------------------------        AI MODULE        ---------------------------------------------------------
 
 
