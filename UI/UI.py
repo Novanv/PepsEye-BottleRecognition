@@ -404,17 +404,12 @@ def WATER_CHECK(image_path):
     # Tạo list để chứa các giá trị được thêm vào từ việc xử lí thông tin good hoặc error
     CHECK = []
     
-    # Đặt kích thước tiêu chuẩn
-    SIZE = (500, 500)
-    
     # Độc thông tin ảnh từ đường dẫn
     image = cv2.imread(image_path)
     
-    # Thực hiện resize theo kích thước đã quy định ở trên
-    image = cv2.resize(image, SIZE)
-    
     # Chọn vùng để trị, giới hạn vùng để tránh ảnh hưởng của các đường biên, gây cho model phát hiện các cạnh bị sai
-    img_roi = image[0:500, 100:400]
+    
+    img_roi = image[60:420,120:520]
     
     # Áp dụng Gaussian Blur
     image_GauBlur = cv2.GaussianBlur(img_roi, (3, 3), 1)
@@ -423,7 +418,7 @@ def WATER_CHECK(image_path):
     gray = cv2.cvtColor(image_GauBlur, cv2.COLOR_BGR2GRAY)
     
     # Áp dụng phép Canny để phát hiện cạnh
-    edges = cv2.Canny(gray, 30, 90)
+    edges = cv2.Canny(gray, 20, 80)
     
     # Tìm các đường biên sau khi làm mịn
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -461,7 +456,7 @@ def WATER_CHECK(image_path):
     WIDTH,HEIGHT = color_mask.shape[1],color_mask.shape[0] # Chiều rộng, chiều dài
 
     # Tạo một hình chữ nhật chỉ định khu vực mực nước chuẩn. 
-    X_ROI_WATER, Y_ROI_WATER = 0, int((0.235*HEIGHT))   # Đặt vị trí (x,y) góc trái trên cùng của hình chữ nhật 
+    X_ROI_WATER, Y_ROI_WATER = 0, int((0.202*HEIGHT))   # Đặt vị trí (x,y) góc trái trên cùng của hình chữ nhật 
     size_x_ROI_WATER = WIDTH                            # Chiều rộng của vùng kiểm tra mực nước
     size_y_ROI_WATER = int(0.04*HEIGHT)                 # Chiều cao của của vùng kiểm tra mực nước
     ROI_WATER = color_mask[Y_ROI_WATER : Y_ROI_WATER + size_y_ROI_WATER,X_ROI_WATER:X_ROI_WATER + size_x_ROI_WATER] # Thiết lập vùng kiểm tra mực nước
