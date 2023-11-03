@@ -187,14 +187,14 @@ def BOTTLE_CHECK(img):
     # Cắt phần quan tâm của ảnh để loại bỏ các thành phần không liên quan trong ảnh và gán cho biến 'img_roi'
     img_roi = img[60:420, 120:520]
 
-    # Áp dụng Gaussian Blur để làm mịn ảnh, dùng bộ lọc 3x3 với độ lệch chuẩn 1 (mức độ mịn)
-    image_GauBlur = cv2.GaussianBlur(img_roi, (3, 3), 1)    # Sau đó gán cho biến 'image_GauBlur'
+    # Áp dụng Gaussian Blur để làm mịn ảnh, dùng bộ lọc 3x3 với độ lệch chuẩn 4 (mức độ mịn)
+    image_GauBlur = cv2.GaussianBlur(img_roi, (3, 3), 4)    # Sau đó gán cho biến 'image_GauBlur'
 
     # Chuyển đổi ảnh sang ảnh grayscale (thang màu xám), cụ thể từ không gian màu Blue,Green,Red sang Gray
     gray = cv2.cvtColor(image_GauBlur, cv2.COLOR_BGR2GRAY)  # Gán ảnh ở grayscale cho biến 'gray'
 
     # Áp dụng phương pháp Canny để phát hiện các cạnh của chai nước với ngưỡng dưới là 20 và ngưỡng trên là 80
-    edges = cv2.Canny(gray, 30, 90)     # Gán ảnh phát hiện ra cạnh của chai nước cho biến 'edges'
+    edges = cv2.Canny(gray, 20, 80)     # Gán ảnh phát hiện ra cạnh của chai nước cho biến 'edges'
 
     # Tìm các đường viền của vỏ chai từ ảnh phát hiện cạnh 'edges' bằng hàm 'cv2.findContours', trong đó:
     # 'cv2.RETR_EXTERNAL' là cờ chỉ định cách trích xuất các đường viền, chỉ trích xuất các đường viền bên ngoài (external contours) và không bao gồm các đường viền nằm bên trong chai nước 
@@ -232,25 +232,25 @@ def BOTTLE_CHECK(img):
     # Các vị trí đều lấy theo tỉ lệ so với chiều cao
 
     # Phần thân trên lấy 2 vị trí, lần lượt mỗi vị trí sẽ lấy hai tham số là 'x' trong cột 'Oxy'
-    roi_1_x1 = int(height*0.1269)
-    roi_1_x2 = int(height*0.1746)
+    roi_1_x1 = int(height*0.127)
+    roi_1_x2 = int(height*0.175)
 
-    roi_2_x1 = int(height*0.2904)
-    roi_2_x2 = int(height*0.3492)
+    roi_2_x1 = int(height*0.222)
+    roi_2_x2 = int(height*0.286)
     
     # Phần thân giữa lấy 2 vị trí, lần lượt mỗi vị trí sẽ lấy hai tham số là 'x' trong cột 'Oxy'
-    roi_3_x1 = int(height*0.3968)
-    roi_3_x2 = int(height*0.4761)
+    roi_3_x1 = int(height*0.398)
+    roi_3_x2 = int(height*0.445)
 
-    roi_4_x1 = int(height*0.6273)
-    roi_4_x2 = int(height*0.6984)
+    roi_4_x1 = int(height*0.589)
+    roi_4_x2 = int(height*0.636)
 
     # Phần thân dưới lấy 2 vị trí, lần lượt mỗi vị trí sẽ lấy hai tham số là 'x' trong cột 'Oxy' 
-    roi_5_x1 = int(height*0.7142)
-    roi_5_x2 = int(height*0.7619)
+    roi_5_x1 = int(height*0.668)
+    roi_5_x2 = int(height*0.716)
 
-    roi_6_x1 = int(height*0.8036)
-    roi_6_x2 = int(height*0.8741)
+    roi_6_x1 = int(height*0.764)
+    roi_6_x2 = int(height*0.828)
 
     # Sau khi có được khoảng từ 'x_1' đến 'x_2' cho mỗi khoảng vị trí, ta cắt hình ảnh chai nước ra thành 6 phần tương ứng 
     roi_1 = roi_content[roi_1_x1:roi_1_x2, 0:max_x]
@@ -270,8 +270,8 @@ def BOTTLE_CHECK(img):
     # Chuyển đổi ảnh sang ảnh grayscale (thang màu xám), cụ thể từ không gian màu Blue,Green,Red sang Gray
     gray_roi1 = cv2.cvtColor(image_GauBlur_roi1, cv2.COLOR_BGR2GRAY)
 
-    # Áp dụng phương pháp Canny để phát hiện các cạnh của chai nước với ngưỡng dưới là 20 và ngưỡng trên là 80
-    edges_roi1 = cv2.Canny(gray_roi1, 20, 80)
+    # Áp dụng phương pháp Canny để phát hiện các cạnh của chai nước với ngưỡng dưới là 5 và ngưỡng trên là 30
+    edges_roi1 = cv2.Canny(gray_roi1, 5, 30)
 
     # Tìm các đường viền của vỏ chai từ ảnh phát hiện cạnh 'edges' bằng hàm 'cv2.findContours', trong đó:
     # 'cv2.RETR_EXTERNAL' là cờ chỉ định cách trích xuất các đường viền, chỉ trích xuất các đường viền bên ngoài (external contours) và không bao gồm các đường viền nằm bên trong chai nước 
@@ -301,8 +301,8 @@ def BOTTLE_CHECK(img):
     # Chuyển đổi ảnh sang ảnh grayscale (thang màu xám), cụ thể từ không gian màu Blue,Green,Red sang Gray
     gray_roi2= cv2.cvtColor(image_GauBlur_roi2, cv2.COLOR_BGR2GRAY)
 
-    # Áp dụng phương pháp Canny để phát hiện các cạnh của chai nước với ngưỡng dưới là 20 và ngưỡng trên là 80
-    edges_roi2 = cv2.Canny(gray_roi2, 20, 80)
+    # Áp dụng phương pháp Canny để phát hiện các cạnh của chai nước với ngưỡng dưới là 5 và ngưỡng trên là 30
+    edges_roi2 = cv2.Canny(gray_roi2, 5, 30)
 
     # Tìm các đường viền của vỏ chai từ ảnh phát hiện cạnh 'edges' bằng hàm 'cv2.findContours', trong đó:
     # 'cv2.RETR_EXTERNAL' là cờ chỉ định cách trích xuất các đường viền, chỉ trích xuất các đường viền bên ngoài (external contours) và không bao gồm các đường viền nằm bên trong chai nước 
@@ -332,8 +332,8 @@ def BOTTLE_CHECK(img):
     # Chuyển đổi ảnh sang ảnh grayscale (thang màu xám), cụ thể từ không gian màu Blue,Green,Red sang Gray
     gray_roi3 = cv2.cvtColor(image_GauBlur_roi3, cv2.COLOR_BGR2GRAY)
 
-    # Áp dụng phương pháp Canny để phát hiện các cạnh của chai nước với ngưỡng dưới là 20 và ngưỡng trên là 80
-    edges_roi3 = cv2.Canny(gray_roi3, 20, 80)
+    # Áp dụng phương pháp Canny để phát hiện các cạnh của chai nước với ngưỡng dưới là 50 và ngưỡng trên là 30
+    edges_roi3 = cv2.Canny(gray_roi3, 5, 30)
 
     # Tìm các đường viền của vỏ chai từ ảnh phát hiện cạnh 'edges' bằng hàm 'cv2.findContours', trong đó:
     # 'cv2.RETR_EXTERNAL' là cờ chỉ định cách trích xuất các đường viền, chỉ trích xuất các đường viền bên ngoài (external contours) và không bao gồm các đường viền nằm bên trong chai nước 
@@ -363,8 +363,8 @@ def BOTTLE_CHECK(img):
     # Chuyển đổi ảnh sang ảnh grayscale (thang màu xám), cụ thể từ không gian màu Blue,Green,Red sang Gray
     gray_roi4 = cv2.cvtColor(image_GauBlur_roi4, cv2.COLOR_BGR2GRAY)
 
-    # Áp dụng phương pháp Canny để phát hiện các cạnh của chai nước với ngưỡng dưới là 20 và ngưỡng trên là 80
-    edges_roi4 = cv2.Canny(gray_roi4, 20, 80)
+    # Áp dụng phương pháp Canny để phát hiện các cạnh của chai nước với ngưỡng dưới là 5 và ngưỡng trên là 30
+    edges_roi4 = cv2.Canny(gray_roi4, 5, 30)
 
     # Tìm các đường viền của vỏ chai từ ảnh phát hiện cạnh 'edges' bằng hàm 'cv2.findContours', trong đó:
     # 'cv2.RETR_EXTERNAL' là cờ chỉ định cách trích xuất các đường viền, chỉ trích xuất các đường viền bên ngoài (external contours) và không bao gồm các đường viền nằm bên trong chai nước 
@@ -394,8 +394,8 @@ def BOTTLE_CHECK(img):
     # Chuyển đổi ảnh sang ảnh grayscale (thang màu xám), cụ thể từ không gian màu Blue,Green,Red sang Gray
     gray_roi5 = cv2.cvtColor(image_GauBlur_roi5, cv2.COLOR_BGR2GRAY)
 
-    # Áp dụng phương pháp Canny để phát hiện các cạnh của chai nước với ngưỡng dưới là 20 và ngưỡng trên là 80
-    edges_roi5 = cv2.Canny(gray_roi5, 20, 80)
+    # Áp dụng phương pháp Canny để phát hiện các cạnh của chai nước với ngưỡng dưới là 5 và ngưỡng trên là 30
+    edges_roi5 = cv2.Canny(gray_roi5, 5, 30)
 
     # Tìm các đường viền của vỏ chai từ ảnh phát hiện cạnh 'edges' bằng hàm 'cv2.findContours', trong đó:
     # 'cv2.RETR_EXTERNAL' là cờ chỉ định cách trích xuất các đường viền, chỉ trích xuất các đường viền bên ngoài (external contours) và không bao gồm các đường viền nằm bên trong chai nước 
@@ -425,8 +425,8 @@ def BOTTLE_CHECK(img):
     # Chuyển đổi ảnh sang ảnh grayscale (thang màu xám), cụ thể từ không gian màu Blue,Green,Red sang Gray
     gray_roi6 = cv2.cvtColor(image_GauBlur_roi6, cv2.COLOR_BGR2GRAY)
 
-    # Áp dụng phương pháp Canny để phát hiện các cạnh của chai nước với ngưỡng dưới là 20 và ngưỡng trên là 80
-    edges_roi6 = cv2.Canny(gray_roi6, 20, 80)
+    # Áp dụng phương pháp Canny để phát hiện các cạnh của chai nước với ngưỡng dưới là 5 và ngưỡng trên là 30
+    edges_roi6 = cv2.Canny(gray_roi6, 5, 30)
 
     # Tìm đường viền cao nhất, thấp nhất, và vị trí rộng nhất 2 bên
     # Ban đầu, thiết lập max_x, min_x, max_y, và min_y bằng tọa độ của điểm ảnh đầu tiên trong đường viền đầu tiên
@@ -451,53 +451,53 @@ def BOTTLE_CHECK(img):
     CHECK = []
 
     # Xet chieu rong roi_1 vs roi_2
-    if 0.8 <= (wide_1 / wide_2) <= 1 : 
+    if 0.83 <= (wide_1 / wide_2) <= 1 : 
         CHECK.append(0)
     else:
         CHECK.append(1)
 
     # Xet chieu rong roi_3 vs roi_4
-    if 0.94 <(wide_3 / wide_4) < 1.04:
+    if 0.95 <= (wide_3 / wide_4) <= 1.05:
         CHECK.append(0)
     else:
         CHECK.append(1)
 
     # Xet chieu rong roi_5 vs roi_6
-    if 0.93 <= (wide_5 / wide_6) <= 1:
+    if 0.9 <= (wide_5 / wide_6) <= 1:
         CHECK.append(0)
     else:
         CHECK.append(1)
 
     # Xet chieu rong roi_2 vs roi_3
-    if 0.9 <= (wide_3 / wide_2) < 0.98:
+    if 0.9 <= (wide_3 / wide_2) <= 0.98:
         CHECK.append(0)
     else:
         CHECK.append(1)
 
     # Xet chieu rong roi_2 vs roi_6
-    if 0.95 < (wide_2 / wide_6) < 1.05:
+    if 0.95 <= (wide_2 / wide_6) <= 1.05:
         CHECK.append(0)
     else:
         CHECK.append(1)
 
     # Xet chieu rong roi_3 vs roi_6
-    if 0.9 <= (wide_3 / wide_6) < 0.98:
+    if 0.9 <= (wide_3 / wide_6) <= 0.98:
         CHECK.append(0)
     else:
         CHECK.append(1)
 
     # Xet chieu cao 
-    if 3.25 < (height / wide_2) < 3.7:
+    if 2.9 <= (height / wide_2) <= 3.7:
         CHECK.append(0)
     else:
         CHECK.append(1)
 
-    if 3.4 < (height / wide_4) < 3.85:
+    if 3.1 <= (height / wide_4) <= 4:
         CHECK.append(0)
     else:
         CHECK.append(1)
 
-    if 3.25 < (height / wide_2) < 3.7:
+    if 2.9 <= (height / wide_2) <= 3.7:
         CHECK.append(0)
     else:
         CHECK.append(1)
@@ -547,7 +547,7 @@ def LABEL_CHECK(image):
     
     # Sử dụng cv2.countNonZero trên ảnh xám
     white_pixel_count = cv2.countNonZero(gray_image)
-    if white_pixel_count < 500: #Check màu pixel < 500 (nhỏ hơn 500)
+    if white_pixel_count < 1000: #Check màu pixel < 500 (nhỏ hơn 500)
         # Chuyển tất cả pixel màu trắng thành đen
         image_thres = np.zeros_like(image_thres)
 
