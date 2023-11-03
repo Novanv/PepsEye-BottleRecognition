@@ -547,7 +547,7 @@ def LABEL_CHECK(image):
     
     # Sử dụng cv2.countNonZero trên ảnh xám
     white_pixel_count = cv2.countNonZero(gray_image)
-    if white_pixel_count < 1000: #Check màu pixel < 500 (nhỏ hơn 500)
+    if white_pixel_count < 1200: #Check màu pixel < 1200 (nhỏ hơn 1200)
         # Chuyển tất cả pixel màu trắng thành đen
         image_thres = np.zeros_like(image_thres)
 
