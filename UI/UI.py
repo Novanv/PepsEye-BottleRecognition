@@ -169,8 +169,34 @@ text_capture_sample_rect = button_capture_sample_text.get_rect(center=button_cap
 
 #--------------------------------------------------------------        AI MODULE        ---------------------------------------------------------
 
+def CHECK_EXIST(img):
+    # Đây là hàm BOTTLE_EXIST có mục đích là kiểm tra xem có tồn tại đối tượng trong khung của camera hay không
+    # Tham số đầu vào sẽ là đường dẫn của 1 ảnh 'image_path'
+    # Tham số đầu ra sẽ 1 list với 1 phần tử duy nhất là '["EXIST"]' hoặc '["NOEXIST"]'
+    # '["EXIST"]' có nghĩa là có tồn tại đối tượng để kiểm tra, '["NOEXIST"]' là có nghĩa là không tồn tại đối tượng để kiểm tra
+    #------------------------------------------------------------------------------------#
 
+    # Cắt phần quan tâm của ảnh để loại bỏ các thành phần không liên quan trong ảnh và gán cho biến 'img_roi'
+    img_roi = img[60:420, 120:520]
 
+    # Áp dụng Gaussian Blur để làm mịn ảnh, dùng bộ lọc 3x3 với độ lệch chuẩn 4 (mức độ mịn)
+    image_GauBlur = cv2.GaussianBlur(img_roi, (3, 3), 4)    # Sau đó gán cho biến 'image_GauBlur'
+
+    # Chuyển đổi ảnh sang ảnh grayscale (thang màu xám), cụ thể từ không gian màu Blue,Green,Red sang Gray
+    gray = cv2.cvtColor(image_GauBlur, cv2.COLOR_BGR2GRAY)  # Gán ảnh ở grayscale cho biến 'gray'
+
+    # Áp dụng phương pháp Canny để phát hiện các cạnh của chai nước với ngưỡng dưới là 20 và ngưỡng trên là 80
+    edges = cv2.Canny(gray, 20, 80)     # Gán ảnh phát hiện ra cạnh của chai nước cho biến 'edges'
+
+    # Tìm các đường viền của vỏ chai từ ảnh phát hiện cạnh 'edges' bằng hàm 'cv2.findContours', trong đó:
+    # 'cv2.RETR_EXTERNAL' là cờ chỉ định cách trích xuất các đường viền, chỉ trích xuất các đường viền bên ngoài (external contours) và không bao gồm các đường viền nằm bên trong chai nước 
+    # 'cv2.CHAIN_APPROX_SIMPLE' là cách biểu diễn các đường viền bằng cách lưu trữ chỉ các đỉnh quan trọng của đường viền. Nó loại bỏ các đỉnh không cần thiết để tiết kiệm bộ nhớ
+    # Ở đây, chúng ta không quan tâm đến giá trị thứ 2 mà hàm 'cv2.findContours trả về, tức số lỗ hoặc đối tượng con bên trong các đường viền chính nên sử dụng _  
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)   # Gán danh sách đường viền cho biến 'contours', ở đây mỗi đường viền là một danh sách các điểm
+    if contours == ():
+        return ["NOEXIST"]
+    else: 
+        return ["EXIST"]
 
 
 # Hàm check bottle = > return [0] = Good hoặc [1] = Error -------------------------------/
@@ -674,31 +700,35 @@ def MODULE_CHECK(image_path):
     
     image = cv2.imread(image_path)
     CHECK = []
+    EXIST_OBJ = CHECK_EXIST(image) 
+    
+    if EXIST_OBJ[0] == "NOEXIST": # Kiểm tra biến tồn tại 
+        return ["NOEXIST"]
+    else:
+        # Biến check bottle = List giá trị trả về từ hàm Check bottle (image_path)
+        BOTTLE_CHECK_ = BOTTLE_CHECK(image) # Lấy kết quả từ hàm kiểm tra vỏ chai 
+        if 1 in BOTTLE_CHECK_:                   # Nếu kết quả kiểm tra vỏ chai là lỗi, thêm giá trị 1 vào danh sách 'CHECK'
+            CHECK.append(1)
+        else:                                   # Nếu kết quả kiểm tra vỏ chai là tốt, thêm giá trị 0 vào danh sách 'CHECK'
+            CHECK.append(0)       
 
-    # Biến check bottle = List giá trị trả về từ hàm Check bottle (image_path)
-    BOTTLE_CHECK_ = BOTTLE_CHECK(image) # Lấy kết quả từ hàm kiểm tra vỏ chai 
-    if 1 in BOTTLE_CHECK_:                   # Nếu kết quả kiểm tra vỏ chai là lỗi, thêm giá trị 1 vào danh sách 'CHECK'
-        CHECK.append(1)
-    else:                                   # Nếu kết quả kiểm tra vỏ chai là tốt, thêm giá trị 0 vào danh sách 'CHECK'
-        CHECK.append(0)       
 
+        # Biến check Label = List giá trị trả về từ hàm Check Label (image_path)
+        LABEL_CHECK_ = LABEL_CHECK(image) # Lấy kết quả từ hàm kiểm tra vỏ chai 
+        if 1 in LABEL_CHECK_:                   # Nếu kết quả kiểm tra vỏ chai là lỗi, thêm giá trị 1 vào danh sách 'CHECK'
+            CHECK.append(2)
+        else:                                   # Nếu kết quả kiểm tra vỏ chai là tốt, thêm giá trị 0 vào danh sách 'CHECK'
+            CHECK.append(0)
 
-    # Biến check Label = List giá trị trả về từ hàm Check Label (image_path)
-    LABEL_CHECK_ = LABEL_CHECK(image) # Lấy kết quả từ hàm kiểm tra vỏ chai 
-    if 1 in LABEL_CHECK_:                   # Nếu kết quả kiểm tra vỏ chai là lỗi, thêm giá trị 1 vào danh sách 'CHECK'
-        CHECK.append(2)
-    else:                                   # Nếu kết quả kiểm tra vỏ chai là tốt, thêm giá trị 0 vào danh sách 'CHECK'
-        CHECK.append(0)
+            
+        # Biến check water level = List giá trị trả về từ hàm Check water level (image_path)
+        WATER_CHECK_ = WATER_CHECK(image) # Lấy kết quả từ hàm kiểm tra  
+        if 1 in WATER_CHECK_:                   # Nếu kết quả kiểm tra water level là lỗi, thêm giá trị 2 vào danh sách 'CHECK'
+            CHECK.append(3)
+        else:                                   # Nếu kết quả kiểm tra water level là tốt, thêm giá trị 0 vào danh sách 'CHECK'
+            CHECK.append(0)
 
-        
-    # Biến check water level = List giá trị trả về từ hàm Check water level (image_path)
-    WATER_CHECK_ = WATER_CHECK(image) # Lấy kết quả từ hàm kiểm tra  
-    if 1 in WATER_CHECK_:                   # Nếu kết quả kiểm tra water level là lỗi, thêm giá trị 2 vào danh sách 'CHECK'
-        CHECK.append(3)
-    else:                                   # Nếu kết quả kiểm tra water level là tốt, thêm giá trị 0 vào danh sách 'CHECK'
-        CHECK.append(0)
-
-    return CHECK
+        return CHECK
 
 # #-----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -920,58 +950,63 @@ while running:
             captured_image_surface = pygame.transform.scale(captured_image_surface, (390, 300))
             screen.blit(captured_image_surface,(screen_width - 475, 40))
             
-            if [0,0,0] == TYPE_ERROR:
-                # Thêm thông tin và hồ sơ csv
-                if is_csv:
+            if TYPE_ERROR == ["NOEXIST"]:
+                bottle_info_error_text = font.render("?", True, (200,0,0))
+                label_info_error_text = font.render("?", True, (200,0,0))
+                water_info_error_text = font.render("?", True, (200,0,0))
+            else:
+                if [0,0,0] == TYPE_ERROR:
+                    # Thêm thông tin và hồ sơ csv
+                    if is_csv:
+                        df = pd.read_csv("data.csv")
+                        id = int(df.shape[0])
+                        new_data = pd.DataFrame({
+                            "id" : id,
+                            "bottle": [0],
+                            "label" : [0],
+                            "water" : [0],
+                            "type" : [0]
+                        })
+                        result = pd.concat([df,new_data],ignore_index=True)
+                        result.to_csv("data.csv",index=False)
+                        is_csv = not is_csv
+                    
+                    bottle_info_error_text = font.render("GOOD", True, bottle_info_color)
+                    label_info_error_text = font.render("GOOD", True, label_info_color)
+                    water_info_error_text = font.render("GOOD", True, water_info_color)
+                else:
+                    # Thêm thông tin và hồ sơ csv
                     df = pd.read_csv("data.csv")
                     id = int(df.shape[0])
-                    new_data = pd.DataFrame({
-                        "id" : id,
-                        "bottle": [0],
-                        "label" : [0],
-                        "water" : [0],
-                        "type" : [0]
-                    })
-                    result = pd.concat([df,new_data],ignore_index=True)
-                    result.to_csv("data.csv",index=False)
-                    is_csv = not is_csv
-                
-                bottle_info_error_text = font.render("GOOD", True, bottle_info_color)
-                label_info_error_text = font.render("GOOD", True, label_info_color)
-                water_info_error_text = font.render("GOOD", True, water_info_color)
-            else:
-                # Thêm thông tin và hồ sơ csv
-                df = pd.read_csv("data.csv")
-                id = int(df.shape[0])
-                bottle_csv = 0
-                label_csv = 0
-                water_csv = 0
-                
-                bottle_info_error_text = font.render("GOOD", True, bottle_info_color)
-                label_info_error_text = font.render("GOOD", True, label_info_color)
-                water_info_error_text = font.render("GOOD", True, water_info_color)
-                if 1 in TYPE_ERROR:
-                    bottle_csv = 1
-                    bottle_info_error_text = font.render("ERROR", True, (200,0,0))
-                if 2 in TYPE_ERROR:
-                    label_csv = 1
-                    label_info_error_text = font.render("ERROR", True, (200,0,0))
-                if 3 in TYPE_ERROR:
-                    water_csv = 1
-                    water_info_error_text = font.render("ERROR", True, (200,0,0))
-                
-                if is_csv:
-                    df = pd.read_csv("data.csv")
-                    new_data = pd.DataFrame({
-                        "id" : id,
-                        "bottle": [bottle_csv],
-                        "label" : [label_csv],
-                        "water" : [water_csv],
-                        "type" : [1]
-                    })
-                    result = pd.concat([df,new_data],ignore_index=True)
-                    result.to_csv("data.csv",index=False)
-                    is_csv = not is_csv
+                    bottle_csv = 0
+                    label_csv = 0
+                    water_csv = 0
+                    
+                    bottle_info_error_text = font.render("GOOD", True, bottle_info_color)
+                    label_info_error_text = font.render("GOOD", True, label_info_color)
+                    water_info_error_text = font.render("GOOD", True, water_info_color)
+                    if 1 in TYPE_ERROR:
+                        bottle_csv = 1
+                        bottle_info_error_text = font.render("ERROR", True, (200,0,0))
+                    if 2 in TYPE_ERROR:
+                        label_csv = 1
+                        label_info_error_text = font.render("ERROR", True, (200,0,0))
+                    if 3 in TYPE_ERROR:
+                        water_csv = 1
+                        water_info_error_text = font.render("ERROR", True, (200,0,0))
+                    
+                    if is_csv:
+                        df = pd.read_csv("data.csv")
+                        new_data = pd.DataFrame({
+                            "id" : id,
+                            "bottle": [bottle_csv],
+                            "label" : [label_csv],
+                            "water" : [water_csv],
+                            "type" : [1]
+                        })
+                        result = pd.concat([df,new_data],ignore_index=True)
+                        result.to_csv("data.csv",index=False)
+                        is_csv = not is_csv
             
                 
         if is_detail_button_visible:
@@ -1149,7 +1184,7 @@ while running:
             screen.blit(good_info_error_text, good_info_error_rect)
             
             error_info_color = (0,0,0)
-            TOTAL_ERROR_content = str("Number of defective products: " + str(type_counts.get(1,1)))
+            TOTAL_ERROR_content = str("Number of defective products: " + str(type_counts.get(1,0)))
             error_info_error_text = font.render(TOTAL_ERROR_content, True, error_info_color)
             error_info_error_rect = button_detail_text.get_rect(center=((screen_width - 440), 270))
             screen.blit(error_info_error_text, error_info_error_rect)
