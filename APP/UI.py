@@ -1,4 +1,4 @@
-from requirement import *
+from lib import *
 from AI import *
 
 pygame.init()
