@@ -1,10 +1,6 @@
-from lib import *
+import UI
 
-#Run app
-
-def main():
-    # Run UI.py
-    subprocess.run(["python", "APP/UI.py"])
+#Run APP
 
 if __name__ == "__main__":
-    main()
+    UI
