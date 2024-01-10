@@ -609,6 +609,20 @@ while running:
                 noti_sample_data_rect = noti_sample_data_text.get_rect(center=(screen_width-395, 20))
                 screen.blit(noti_sample_data_text, noti_sample_data_rect)
                 
+                len_jpg = len(os.listdir("sample_data"))
+                font__ = pygame.font.Font(None, 28)
+                list_dir_sample_data_text = font__.render("Number of files: {}".format(len_jpg), True, (200, 255, 128))
+                list_dir_sample_data_rect = list_dir_sample_data_text.get_rect(center=(115,550))
+                screen.blit(list_dir_sample_data_text, list_dir_sample_data_rect)
+                if len_jpg > 0:
+                    last_file_sample_data_text = font__.render("The last file: sample_{}.jpg".format(len_jpg), True, (0, 0, 0))
+                    last_file_sample_data_rect = last_file_sample_data_text.get_rect(center=(156,580))
+                    screen.blit(last_file_sample_data_text, last_file_sample_data_rect)
+                elif len_jpg == 0:
+                    last_file_sample_data_text = font__.render("No file", True, (0, 0, 0))
+                    last_file_sample_data_rect = last_file_sample_data_text.get_rect(center=(156,580))
+                    screen.blit(last_file_sample_data_text, last_file_sample_data_rect)
+                
             else:
                 sample_data_text_on = font.render("ON", True, (0,0,0))
                 sample_data_text_off = font.render("OFF", True, (255,0,0))
